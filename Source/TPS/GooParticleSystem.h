@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <functional>
 #include "CoreMinimal.h"
 #include "FGooParams.h"
 #include "GooParticleGrid.h"
@@ -10,6 +11,7 @@
 /**
  * 
  */
+
 
 class TPS_API GooParticleSystem
 {
@@ -24,7 +26,7 @@ public:
 	GooParticleSystem(UInstancedStaticMeshComponent* InObjectPool, USkeletalMeshComponent* InSkeletalMesh, TArray<FName>* InBones);
 	~GooParticleSystem();
 	
-	void SetInitialPool(int32 PoolSize, FGooParams GooParams);
+	void SetInitialPool(int32 PoolSize, const FGooParams& GooParams, const std::function<FVector()>& CalculatePosDelegate);
 	void Update(float DeltaTime);
 
 	void CalculateParentAttraction(float DeltaTime);
@@ -37,9 +39,9 @@ public:
 
 private:
 	FGooParams GooParams;
-	TArray<float> densities;
-	TArray<FVector> velocities;
-	TArray<FVector> predictedPositions;
+	//TArray<float> densities;
+	//TArray<FVector> velocities;
+	//TArray<FVector> predictedPositions;
 	
 	TArray<FName>* Bones;
 };

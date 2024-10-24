@@ -20,14 +20,14 @@ GooParticleSystem::~GooParticleSystem()
 	delete ObjectPool;
 }
 
-void GooParticleSystem::SetInitialPool(int32 PoolSize, FGooParams InGooParams)
+void GooParticleSystem::SetInitialPool(int32 PoolSize, const FGooParams& InGooParams, const std::function<FVector()>& CalculatePosDelegate)
 {
 	for (int32 i = 0; i < PoolSize; ++i)
 	{
-		int32 newIndex = ObjectPool->GetInstance(InGooParams);
-		densities.Add(0);
+		int32 newIndex = ObjectPool->GetInstance(CalculatePosDelegate(), InGooParams);
+		//densities.Add(0);
 		//velocities.Add(FVector::Zero());
-		predictedPositions.Add(FVector::Zero());
+		//predictedPositions.Add(FVector::Zero());
 	}
 	GooParams = InGooParams;
 
@@ -155,7 +155,7 @@ void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
 		TotalForce += AttractionDirection * AttractionStrength;
 		
 		Particle->Velocity += TotalForce * DeltaTime;
-		predictedPositions[Particle->Index] = Particle->Position + Particle->Velocity * (1 / 120.0f);
+		Particle->PredictedPosition = Particle->Position + Particle->Velocity * (1 / 120.0f);
 
 	});
 }
@@ -180,11 +180,11 @@ void GooParticleSystem::CalculatePressure(float DeltaTime)
 	ParallelFor(ObjectPool->ActiveInstances.Num(), [this, DeltaTime](int32 Index)
 	{
 		const int32 ParticleIndex = ObjectPool->ActiveInstances[Index];
-		FVector pressureForce = GooCalculator::CalculatePressureForce(ParticleIndex, *ParticleGrid, *ObjectPool, GooParams, densities);
+		const FVector pressureForce = GooCalculator::CalculatePressureForce(ParticleIndex, *ParticleGrid, *ObjectPool, GooParams);
 		
 		if (pressureForce.ContainsNaN()) return;
-        
-		FVector pressureAcceleration = pressureForce / densities[ParticleIndex];
+
+		const FVector pressureAcceleration = pressureForce / ObjectPool->Particles[ParticleIndex].Density;
 		ObjectPool->Particles[ParticleIndex].Velocity += pressureAcceleration * DeltaTime;
 		ObjectPool->Particles[ParticleIndex].Velocity *=  FMath::Pow(1.0f - GooParams.drag, DeltaTime);
 	});
@@ -196,7 +196,7 @@ void GooParticleSystem::CalculateViscosity(float DeltaTime)
 	{
 		const int32 ParticleIndex = ObjectPool->ActiveInstances[Index];
 
-		FVector viscosityForce = GooCalculator::CalculateViscosityForce(ParticleIndex, *ParticleGrid, *ObjectPool, GooParams);
+		const FVector viscosityForce = GooCalculator::CalculateViscosityForce(ParticleIndex, *ParticleGrid, *ObjectPool, GooParams);
 		
 		if (viscosityForce.ContainsNaN()) return;
 		
@@ -222,9 +222,9 @@ void GooParticleSystem::UpdateDensities()
 	{
 		const int32 ParticleIndex = ObjectPool->ActiveInstances[Index];
 
-		const float density = GooCalculator::CalculateDensity(predictedPositions[ParticleIndex], ParticleIndex, *ParticleGrid, *ObjectPool, GooParams);
+		const float density = GooCalculator::CalculateDensity(ObjectPool->Particles[ParticleIndex].PredictedPosition, ParticleIndex, *ParticleGrid, *ObjectPool, GooParams);
 		if (density != 0)
-			densities[ParticleIndex] = density;
+			ObjectPool->Particles[ParticleIndex].Density = density;
 	});
 }
 

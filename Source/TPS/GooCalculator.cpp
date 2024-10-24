@@ -54,7 +54,7 @@ float GooCalculator::CalculateDensity(FVector point, int32 ParticleIndex, const 
 	return density;
 }
 
-FVector GooCalculator::CalculatePressureForce(int index, const GooParticleGrid& ParticleGrid, const ISMObjectPool& ObjectPool, const FGooParams& GooParams, const TArray<float>& Densities)
+FVector GooCalculator::CalculatePressureForce(int index, const GooParticleGrid& ParticleGrid, const ISMObjectPool& ObjectPool, const FGooParams& GooParams)
 {
 	FVector pressureForce = FVector::Zero();
 	
@@ -66,8 +66,8 @@ FVector GooCalculator::CalculatePressureForce(int index, const GooParticleGrid& 
 		FVector dir = dist == 0 ? FMath::VRand() : offset / dist;
 		
 		const float slope = -SmoothingKernel(GooParams.smoothingRadius, dist);
-		float density = Densities[index];
-		float sharedPressure = CalculateSharedPressure(density, Densities[OtherParticle->Index], GooParams);
+		float density = ObjectPool.Particles[index].Density;
+		float sharedPressure = CalculateSharedPressure(density, OtherParticle->Density, GooParams);
 		pressureForce += sharedPressure * dir * slope * 1 / density;
 	}
 

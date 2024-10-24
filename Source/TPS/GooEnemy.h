@@ -22,28 +22,45 @@ protected:
 	GooParticleSystem* ParticleSystem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
-	int32 PoolSize = 100;
+	int32 MaxParticleCount = 2000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
+	int32 InitialPoolSize = 100;
+	
+	UPROPERTY(EditAnywhere, Category = ParticleSystem)
+	int32 ParticlesPerGroup = 50;
+	
+	UPROPERTY(EditAnywhere, Category = ParticleSystem)
+	float SpawnInterval = 10;
+	
+	UPROPERTY(EditAnywhere, Category = ParticleSystem)
+	float RaycastDistance = 1000;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
 	FGooParams GooParams;
 
 	TArray<FName> Bones;
+	FTimerHandle SpawnTimerHandle;
+	
+	virtual void BeginPlay() override;
+
+	void StartSpawning();
+	FVector CalculateSpawnLocation();
+
+	
 
 public:	
 	// Sets default values for this actor's properties
 	AGooEnemy();
 	virtual ~AGooEnemy() override;
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	void Hit(int32 InstanceIndex, UWorld* World) const;
 	void ReceiveImpulse(FVector Location, float Radius, float Force) const;
+	
+	UFUNCTION(BlueprintCallable)
+	void SpawnParticleGroup();
 
 };

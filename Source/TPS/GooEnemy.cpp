@@ -23,7 +23,34 @@ void AGooEnemy::BeginPlay()
 	Super::BeginPlay();
 	
 	ParticleSystem = new GooParticleSystem(ISM, SkeletalMesh, &Bones);
-	ParticleSystem->SetInitialPool(PoolSize, GooParams);
+	const std::function<FVector()> CalculatePosDelegate = std::bind(&AGooEnemy::CalculateSpawnLocation, this);
+
+	ParticleSystem->SetInitialPool(InitialPoolSize, GooParams,  CalculatePosDelegate);
+	StartSpawning();
+}
+
+void AGooEnemy::StartSpawning()
+{
+	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AGooEnemy::SpawnParticleGroup, SpawnInterval, true);
+}
+
+FVector AGooEnemy::CalculateSpawnLocation()
+{
+	const FVector Start = GetActorLocation();
+	const FVector RandomDirection = FMath::VRand();
+	const FVector End = Start + RandomDirection * RaycastDistance;
+
+	FHitResult HitResult;
+	FCollisionQueryParams CollisionParams;
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, CollisionParams))
+	{
+		return HitResult.Location;
+	}
+	else
+	{
+		return End;
+	}
 }
 
 void AGooEnemy::Tick(float DeltaTime)
@@ -41,6 +68,22 @@ void AGooEnemy::Hit(int32 InstanceIndex, UWorld* World) const
 void AGooEnemy::ReceiveImpulse(FVector Location, float Radius, float Force) const
 {
 	ParticleSystem->ReceiveImpulse(Location, Radius, Force);
+}
+
+void AGooEnemy::SpawnParticleGroup()
+{
+	if (ParticleSystem->ObjectPool->ActiveInstances.Num() >= MaxParticleCount)
+		return;
+
+	for (int32 i = 0; i < ParticlesPerGroup; i++)
+	{
+		const FVector SpawnLocation = CalculateSpawnLocation();
+		ParticleSystem->ObjectPool->GetInstance(SpawnLocation, GooParams);
+
+		
+		if (ParticleSystem->ObjectPool->ActiveInstances.Num() >= MaxParticleCount)
+			break;
+	}
 }
 
 AGooEnemy::~AGooEnemy()

@@ -16,6 +16,8 @@ public:
 	int32 Index;
 	
 	bool Active;
+	float Density;
+	FVector PredictedPosition;
 	FVector Pressure;
 
 	
@@ -23,7 +25,7 @@ public:
 	~GooParticle();
 
 	void Update(FVector* newPos);
-	void UpdateInstancePos(FVector* newPos);
+	void UpdateInstancePos(const FVector* newPos);
 	void UpdateInstanceScale(const FVector& newScale);
 
 private:

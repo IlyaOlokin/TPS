@@ -19,9 +19,10 @@ void GooParticle::Update(FVector* newPos)
 {
 	Position = *newPos;
 	UpdateInstancePos(&Position);
+	UpdateInstanceScale(Scale);
 }
 
-void GooParticle::UpdateInstancePos(FVector* newPos)
+void GooParticle::UpdateInstancePos(const FVector* newPos)
 {
 	FTransform InstanceTransform;
 	if (ISM->GetInstanceTransform(Index, InstanceTransform, true))
