@@ -2,7 +2,7 @@
 #include "Components/InstancedStaticMeshComponent.h"
 
 GooParticle::GooParticle(UInstancedStaticMeshComponent* InISM, int32 InISMIndex)
-	: ISM(InISM), Index(InISMIndex), bIsScaling(false), CurrentScaleTime(0.0f), TargetScaleTime(1.0f)
+	: Index(InISMIndex), ISM(InISM), bIsScaling(false), CurrentScaleTime(0.0f), TargetScaleTime(1.0f)
 {
 }
 
@@ -17,16 +17,13 @@ void GooParticle::StartScaleUp(float TargetSize, float Duration)
 	bIsScaling = true;
 }
 
-void GooParticle::Update(FVector* NewPos, float DeltaTime)
+void GooParticle::Update(float DeltaTime)
 {
-	Position = *NewPos;
-	UpdateInstancePos(&Position);
-
 	if (bIsScaling)
 	{
 		TickScaleUp(DeltaTime);
 	}
-	UpdateInstanceScale(Scale);
+	UpdateInstanceTransform();
 }
 
 void GooParticle::TickScaleUp(float DeltaTime)
@@ -38,30 +35,43 @@ void GooParticle::TickScaleUp(float DeltaTime)
 	if (Alpha >= 1.0f)
 	{
 		bIsScaling = false;
+		Scale = TargetScale;
 	}
 }
 
-void GooParticle::UpdateInstancePos(const FVector* NewPos)
+void GooParticle::UpdateInstanceTransform()
 {
 	if (!ISM) return;
 
 	FTransform InstanceTransform;
 	if (ISM->GetInstanceTransform(Index, InstanceTransform, true))
 	{
-		InstanceTransform.SetLocation(*NewPos);
+		InstanceTransform.SetLocation(Position);
+		InstanceTransform.SetScale3D(Scale);
 		ISM->UpdateInstanceTransform(Index, InstanceTransform, true, false, false);
 	}
 }
 
-void GooParticle::UpdateInstanceScale(const FVector& NewScale)
+void GooParticle::UpdateInstancePos()
 {
 	if (!ISM) return;
 
 	FTransform InstanceTransform;
 	if (ISM->GetInstanceTransform(Index, InstanceTransform, true))
 	{
-		InstanceTransform.SetScale3D(NewScale);
-		if (InstanceTransform.ContainsNaN()) return;
+		InstanceTransform.SetLocation(Position);
+		ISM->UpdateInstanceTransform(Index, InstanceTransform, true, false, false);
+	}
+}
+
+void GooParticle::UpdateInstanceScale()
+{
+	if (!ISM) return;
+
+	FTransform InstanceTransform;
+	if (ISM->GetInstanceTransform(Index, InstanceTransform, true))
+	{
+		InstanceTransform.SetScale3D(Scale);
 		ISM->UpdateInstanceTransform(Index, InstanceTransform, true, false, false);
 	}
 }

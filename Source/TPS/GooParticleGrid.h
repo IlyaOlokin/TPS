@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <unordered_map>
-#include <vector>
 #include "CoreMinimal.h"
 #include "GooParticle.h"
 

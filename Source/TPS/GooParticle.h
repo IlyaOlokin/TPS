@@ -25,9 +25,10 @@ public:
 	~GooParticle();
 
 	void StartScaleUp(float TargetSize, float Duration);
-	void Update(FVector* NewPos, float DeltaTime);
-	void UpdateInstancePos(const FVector* newPos);
-	void UpdateInstanceScale(const FVector& newScale);
+	void Update(float DeltaTime);
+	void UpdateInstanceTransform();
+	void UpdateInstancePos();
+	void UpdateInstanceScale();
 	
 private:
 	UInstancedStaticMeshComponent* ISM;

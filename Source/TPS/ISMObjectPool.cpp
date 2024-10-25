@@ -75,7 +75,7 @@ int32 ISMObjectPool::GetInstance(const FVector Pos, const FGooParams& GooParams,
 		Particles.Add(NewParticle);
 	}
 
-	Particles[InstanceIndex].StartScaleUp(GooParams.size, 5.0f); 
+	Particles[InstanceIndex].StartScaleUp(GooParams.size, GooParams.appearDuration); 
 
     
 	ActiveInstances.Add(InstanceIndex);
@@ -94,7 +94,8 @@ void ISMObjectPool::InitializeParticle(GooParticle& Particle, const FTransform& 
 
 void ISMObjectPool::ReturnInstance(int32 InstanceIndex, float HealDelay, const UWorld* World)
 {
-	Particles[InstanceIndex].UpdateInstanceScale(FVector::Zero());
+	Particles[InstanceIndex].Scale = FVector::Zero();
+	Particles[InstanceIndex].UpdateInstanceScale();
 	Particles[InstanceIndex].Active = false;
 	
 	FTimerHandle TimerHandle;

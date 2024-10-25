@@ -210,10 +210,8 @@ void GooParticleSystem::UpdateParticlePositions(float DeltaTime)
 	for (const auto ParticleIndex : ObjectPool->ActiveInstances)
 	{
 		if (!ObjectPool->Particles[ParticleIndex].Active) continue;
-		FVector newPos = ObjectPool->Particles[ParticleIndex].Position +  ObjectPool->Particles[ParticleIndex].Velocity * DeltaTime;
-		//FVector newPos = ObjectPool->Particles[ParticleIndex].Position +  velocities[ParticleIndex] * DeltaTime;
-		ObjectPool->Particles[ParticleIndex].Update(&newPos, DeltaTime);
-		ObjectPool->Particles[ParticleIndex].Update(&newPos, DeltaTime);
+		ObjectPool->Particles[ParticleIndex].Position +=  ObjectPool->Particles[ParticleIndex].Velocity * DeltaTime;
+		ObjectPool->Particles[ParticleIndex].Update(DeltaTime);
 	}
 }
 
