@@ -57,7 +57,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void Hit(int32 InstanceIndex, UWorld* World) const;
+	void Hit(int32 InstanceIndex) const;
 	void ReceiveImpulse(FVector Location, float Radius, float Force) const;
 	
 	UFUNCTION(BlueprintCallable)

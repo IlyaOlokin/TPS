@@ -16,7 +16,7 @@ ISMObjectPool::~ISMObjectPool()
 {
 }
 
-int32 ISMObjectPool::GetInstance(const FVector Pos, const FGooParams& GooParams)
+/*int32 ISMObjectPool::GetInstance(const FVector Pos, const FGooParams& GooParams, const UWorld* World)
 {
 	int32 InstanceIndex;
 	FTransform DefaultTransform(Pos);
@@ -40,7 +40,7 @@ int32 ISMObjectPool::GetInstance(const FVector Pos, const FGooParams& GooParams)
 		InstanceIndex = ISM->AddInstance(DefaultTransform, true);
 		
 		GooParticle Particle = GooParticle(ISM, InstanceIndex);
-		Particle.Position = DefaultTransform.GetLocation() /*+ ISM->GetOwner()->GetActorLocation()*/;
+		Particle.Position = DefaultTransform.GetLocation() /*+ ISM->GetOwner()->GetActorLocation()#1#;
 		Particle.Scale = FVector(GooParams.size);
 		//Particle.UpdateInstanceScale(FVector(GooParams.size));
 		Particle.Velocity = FVector::Zero();
@@ -53,6 +53,43 @@ int32 ISMObjectPool::GetInstance(const FVector Pos, const FGooParams& GooParams)
 		
 		return InstanceIndex;
 	}
+}*/
+
+int32 ISMObjectPool::GetInstance(const FVector Pos, const FGooParams& GooParams, const UWorld* World)
+{
+	FTransform DefaultTransform(Pos);
+	DefaultTransform.SetScale3D(FVector::Zero());
+
+	int32 InstanceIndex;
+    
+	if (!FreeInstances.IsEmpty())
+	{
+		FreeInstances.Dequeue(InstanceIndex);
+		InitializeParticle(Particles[InstanceIndex], DefaultTransform, GooParams.size);
+	}
+	else
+	{
+		InstanceIndex = ISM->AddInstance(DefaultTransform, true);
+		GooParticle NewParticle = GooParticle(ISM, InstanceIndex);
+		InitializeParticle(NewParticle, DefaultTransform, GooParams.size);
+		Particles.Add(NewParticle);
+	}
+
+	Particles[InstanceIndex].StartScaleUp(GooParams.size, 5.0f); 
+
+    
+	ActiveInstances.Add(InstanceIndex);
+	return InstanceIndex;
+}
+
+void ISMObjectPool::InitializeParticle(GooParticle& Particle, const FTransform& Transform, float Size)
+{
+	Particle.Position = Transform.GetLocation();
+	Particle.Scale = FVector::Zero();
+	Particle.Velocity = FVector::Zero();
+	Particle.Density = 0;
+	Particle.PredictedPosition = FVector::Zero();
+	Particle.Active = true;
 }
 
 void ISMObjectPool::ReturnInstance(int32 InstanceIndex, float HealDelay, const UWorld* World)

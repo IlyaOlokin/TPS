@@ -1,49 +1,67 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GooParticle.h"
-
 #include "Components/InstancedStaticMeshComponent.h"
 
 GooParticle::GooParticle(UInstancedStaticMeshComponent* InISM, int32 InISMIndex)
-{
-	ISM = InISM;
-	Index = InISMIndex;
-}
-
-GooParticle::~GooParticle()
+	: ISM(InISM), Index(InISMIndex), bIsScaling(false), CurrentScaleTime(0.0f), TargetScaleTime(1.0f)
 {
 }
 
-void GooParticle::Update(FVector* newPos)
+GooParticle::~GooParticle() {}
+
+void GooParticle::StartScaleUp(float TargetSize, float Duration)
 {
-	Position = *newPos;
+	StartScale = FVector::ZeroVector;
+	TargetScale = FVector(TargetSize);
+	TargetScaleTime = Duration;
+	CurrentScaleTime = 0.0f;
+	bIsScaling = true;
+}
+
+void GooParticle::Update(FVector* NewPos, float DeltaTime)
+{
+	Position = *NewPos;
 	UpdateInstancePos(&Position);
+
+	if (bIsScaling)
+	{
+		TickScaleUp(DeltaTime);
+	}
 	UpdateInstanceScale(Scale);
 }
 
-void GooParticle::UpdateInstancePos(const FVector* newPos)
+void GooParticle::TickScaleUp(float DeltaTime)
 {
-	FTransform InstanceTransform;
-	if (ISM->GetInstanceTransform(Index, InstanceTransform, true))
+	CurrentScaleTime += DeltaTime;
+	float Alpha = FMath::Clamp(CurrentScaleTime / TargetScaleTime, 0.0f, 1.0f);
+	Scale = FMath::Lerp(StartScale, TargetScale, Alpha);
+
+	if (Alpha >= 1.0f)
 	{
-		
-		//if (FVector::Dist(*newPos, InstanceTransform.GetLocation()) < 1.0f) return;
-		InstanceTransform.SetLocation(*newPos);
-		
-		ISM->UpdateInstanceTransform(Index, InstanceTransform,
-			true, false, false);
+		bIsScaling = false;
 	}
 }
 
-void GooParticle::UpdateInstanceScale(const FVector& newScale)
+void GooParticle::UpdateInstancePos(const FVector* NewPos)
 {
+	if (!ISM) return;
+
 	FTransform InstanceTransform;
 	if (ISM->GetInstanceTransform(Index, InstanceTransform, true))
 	{
-		InstanceTransform.SetScale3D(newScale);
-		if (InstanceTransform.ContainsNaN()) return;	
-		ISM->UpdateInstanceTransform(Index, InstanceTransform,
-			true, false, false);
+		InstanceTransform.SetLocation(*NewPos);
+		ISM->UpdateInstanceTransform(Index, InstanceTransform, true, false, false);
+	}
+}
+
+void GooParticle::UpdateInstanceScale(const FVector& NewScale)
+{
+	if (!ISM) return;
+
+	FTransform InstanceTransform;
+	if (ISM->GetInstanceTransform(Index, InstanceTransform, true))
+	{
+		InstanceTransform.SetScale3D(NewScale);
+		if (InstanceTransform.ContainsNaN()) return;
+		ISM->UpdateInstanceTransform(Index, InstanceTransform, true, false, false);
 	}
 }

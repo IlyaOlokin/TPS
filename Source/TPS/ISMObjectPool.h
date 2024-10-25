@@ -21,7 +21,8 @@ public:
 	ISMObjectPool(UInstancedStaticMeshComponent* InISM);
 	~ISMObjectPool();
 	
-	int32 GetInstance(const FVector Pos, const FGooParams& GooParams);
+	int32 GetInstance(const FVector Pos, const FGooParams& GooParams, const UWorld* World);
+	void InitializeParticle(GooParticle& Particle, const FTransform& Transform, float Size);
 	
 	void ReturnInstance(int32 InstanceIndex, float HealDelay, const UWorld* World);
 	void ReturnInstanceAfterDelay(int32 InstanceIndex);

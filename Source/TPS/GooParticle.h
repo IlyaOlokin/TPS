@@ -24,13 +24,22 @@ public:
 	GooParticle(UInstancedStaticMeshComponent* InISM, int32 ISMIndex);
 	~GooParticle();
 
-	void Update(FVector* newPos);
+	void StartScaleUp(float TargetSize, float Duration);
+	void Update(FVector* NewPos, float DeltaTime);
 	void UpdateInstancePos(const FVector* newPos);
 	void UpdateInstanceScale(const FVector& newScale);
-
+	
 private:
 	UInstancedStaticMeshComponent* ISM;
+	FTimerHandle ScaleUpTimerHandle;
+
+	FVector StartScale;
+	FVector TargetScale;
+	bool bIsScaling;
+	float CurrentScaleTime;
+	float TargetScaleTime;
 	
+	void TickScaleUp(float DeltaTime);
 };
 
 

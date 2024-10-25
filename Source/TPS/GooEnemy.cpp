@@ -25,7 +25,7 @@ void AGooEnemy::BeginPlay()
 	ParticleSystem = new GooParticleSystem(ISM, SkeletalMesh, &Bones);
 	const std::function<FVector()> CalculatePosDelegate = std::bind(&AGooEnemy::CalculateSpawnLocation, this);
 
-	ParticleSystem->SetInitialPool(InitialPoolSize, GooParams,  CalculatePosDelegate);
+	ParticleSystem->SetInitialPool(InitialPoolSize, GooParams,  CalculatePosDelegate, GetWorld());
 	StartSpawning();
 }
 
@@ -60,9 +60,9 @@ void AGooEnemy::Tick(float DeltaTime)
 	ParticleSystem->Update(DeltaTime);
 }
 
-void AGooEnemy::Hit(int32 InstanceIndex, UWorld* World) const
+void AGooEnemy::Hit(int32 InstanceIndex) const
 {
-	ParticleSystem->ObjectPool->ReturnInstance(InstanceIndex, GooParams.healDelay, World);
+	ParticleSystem->ObjectPool->ReturnInstance(InstanceIndex, GooParams.healDelay, GetWorld());
 }
 
 void AGooEnemy::ReceiveImpulse(FVector Location, float Radius, float Force) const
@@ -78,7 +78,7 @@ void AGooEnemy::SpawnParticleGroup()
 	for (int32 i = 0; i < ParticlesPerGroup; i++)
 	{
 		const FVector SpawnLocation = CalculateSpawnLocation();
-		ParticleSystem->ObjectPool->GetInstance(SpawnLocation, GooParams);
+		ParticleSystem->ObjectPool->GetInstance(SpawnLocation, GooParams, GetWorld());
 
 		
 		if (ParticleSystem->ObjectPool->ActiveInstances.Num() >= MaxParticleCount)

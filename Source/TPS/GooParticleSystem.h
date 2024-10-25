@@ -26,7 +26,7 @@ public:
 	GooParticleSystem(UInstancedStaticMeshComponent* InObjectPool, USkeletalMeshComponent* InSkeletalMesh, TArray<FName>* InBones);
 	~GooParticleSystem();
 	
-	void SetInitialPool(int32 PoolSize, const FGooParams& GooParams, const std::function<FVector()>& CalculatePosDelegate);
+	void SetInitialPool(int32 PoolSize, const FGooParams& GooParams, const std::function<FVector()>& CalculatePosDelegate, const UWorld* World);
 	void Update(float DeltaTime);
 
 	void CalculateParentAttraction(float DeltaTime);

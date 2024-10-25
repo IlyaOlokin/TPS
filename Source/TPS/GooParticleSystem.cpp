@@ -20,11 +20,11 @@ GooParticleSystem::~GooParticleSystem()
 	delete ObjectPool;
 }
 
-void GooParticleSystem::SetInitialPool(int32 PoolSize, const FGooParams& InGooParams, const std::function<FVector()>& CalculatePosDelegate)
+void GooParticleSystem::SetInitialPool(int32 PoolSize, const FGooParams& InGooParams, const std::function<FVector()>& CalculatePosDelegate, const UWorld* World)
 {
 	for (int32 i = 0; i < PoolSize; ++i)
 	{
-		int32 newIndex = ObjectPool->GetInstance(CalculatePosDelegate(), InGooParams);
+		int32 newIndex = ObjectPool->GetInstance(CalculatePosDelegate(), InGooParams, World);
 		//densities.Add(0);
 		//velocities.Add(FVector::Zero());
 		//predictedPositions.Add(FVector::Zero());
@@ -212,7 +212,8 @@ void GooParticleSystem::UpdateParticlePositions(float DeltaTime)
 		if (!ObjectPool->Particles[ParticleIndex].Active) continue;
 		FVector newPos = ObjectPool->Particles[ParticleIndex].Position +  ObjectPool->Particles[ParticleIndex].Velocity * DeltaTime;
 		//FVector newPos = ObjectPool->Particles[ParticleIndex].Position +  velocities[ParticleIndex] * DeltaTime;
-		ObjectPool->Particles[ParticleIndex].Update(&newPos);
+		ObjectPool->Particles[ParticleIndex].Update(&newPos, DeltaTime);
+		ObjectPool->Particles[ParticleIndex].Update(&newPos, DeltaTime);
 	}
 }
 
