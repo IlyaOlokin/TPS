@@ -63,6 +63,7 @@ void AGooEnemy::Tick(float DeltaTime)
 void AGooEnemy::Hit(int32 InstanceIndex) const
 {
 	ParticleSystem->ObjectPool->ReturnInstance(InstanceIndex, GooParams.healDelay, GetWorld());
+	OnHitEvent.Broadcast(ParticleSystem->ObjectPool->Particles[InstanceIndex].Position);
 }
 
 void AGooEnemy::ReceiveImpulse(FVector Location, float Radius, float Force) const

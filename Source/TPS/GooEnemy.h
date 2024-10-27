@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "GooEnemy.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHitEvent, FVector, HitLocation);
+
 UCLASS()
 class TPS_API AGooEnemy : public AActor
 {
@@ -42,12 +44,13 @@ protected:
 	TArray<FName> Bones;
 	FTimerHandle SpawnTimerHandle;
 	
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnHitEvent OnHitEvent;
+	
 	virtual void BeginPlay() override;
 
 	void StartSpawning();
 	FVector CalculateSpawnLocation();
-
-	
 
 public:	
 	// Sets default values for this actor's properties
