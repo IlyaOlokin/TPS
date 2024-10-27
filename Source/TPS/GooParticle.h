@@ -16,19 +16,31 @@ public:
 	int32 Index;
 	
 	bool Active;
+	float Density;
+	FVector PredictedPosition;
 	FVector Pressure;
 
 	
 	GooParticle(UInstancedStaticMeshComponent* InISM, int32 ISMIndex);
 	~GooParticle();
 
-	void Update(FVector* newPos);
-	void UpdateInstancePos(FVector* newPos);
-	void UpdateInstanceScale(const FVector& newScale);
-
+	void StartScaleUp(float TargetSize, float Duration);
+	void Update(float DeltaTime);
+	void UpdateInstanceTransform();
+	void UpdateInstancePos();
+	void UpdateInstanceScale();
+	
 private:
 	UInstancedStaticMeshComponent* ISM;
+	FTimerHandle ScaleUpTimerHandle;
+
+	FVector StartScale;
+	FVector TargetScale;
+	bool bIsScaling;
+	float CurrentScaleTime;
+	float TargetScaleTime;
 	
+	void TickScaleUp(float DeltaTime);
 };
 
 

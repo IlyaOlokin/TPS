@@ -19,7 +19,7 @@ public:
 	static float CalculateDensity(FVector point, int32 ParticleIndex, const GooParticleGrid& ParticleGrid,
 		const ISMObjectPool& ObjectPool, const FGooParams& GooParams);
 	static FVector CalculatePressureForce(int index, const GooParticleGrid& ParticleGrid,
-		const ISMObjectPool& ObjectPool, const FGooParams& GooParams, const TArray<float>& Densities);
+		const ISMObjectPool& ObjectPool, const FGooParams& GooParams);
 	static FVector CalculateViscosityForce(int index, const GooParticleGrid& ParticleGrid,
 		 const ISMObjectPool& ObjectPool, const FGooParams& GooParams);
 	

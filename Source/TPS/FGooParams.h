@@ -32,6 +32,9 @@ struct TPS_API FGooParams
 	float healDelay;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float appearDuration;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float secondaryAttractionStrengthMultiplier;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

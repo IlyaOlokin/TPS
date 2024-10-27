@@ -215,8 +215,8 @@ void ATPSCharacter::Shoot()
 	Params.AddIgnoredActor(this);
 	
 	OnShoot.Broadcast();
-	
-	GetWorld()->LineTraceSingleByChannel(AimHitResult, AimStart, AimEnd, ECC_Visibility, Params, FCollisionResponseParams());
+
+	GetWorld()->LineTraceSingleByChannel(AimHitResult, AimStart, AimEnd, ECC_GameTraceChannel2, Params, FCollisionResponseParams());
 	
 	const FVector Start = WeaponSkeletalMesh->GetSocketLocation("Barrel");
 	FVector Dir = AimHitResult.Location - Start;
@@ -225,7 +225,7 @@ void ATPSCharacter::Shoot()
 	
 	FHitResult HitResult;
 
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params, FCollisionResponseParams()))
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel2, Params, FCollisionResponseParams()))
 	{
 		UInstancedStaticMeshComponent* HitISMComponent = Cast<UInstancedStaticMeshComponent>(HitResult.GetComponent());
 		
@@ -239,11 +239,8 @@ void ATPSCharacter::Shoot()
 			{
 				//FTransform InstanceTransform;
 				//HitISMComponent->GetInstanceTransform(InstanceIndex,InstanceTransform);
-				Enemy->Hit(InstanceIndex, GetWorld());
+				Enemy->Hit(InstanceIndex);
 				Enemy->ReceiveImpulse(HitResult.Location, HitImpulseRadius, HitImpulseForce);
-				
-				
-
 			}
 		}
 		DrawDebugLine(GetWorld(), Start, HitResult.Location, FColor::Green, false, 1.0f);
