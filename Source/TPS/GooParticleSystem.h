@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "FGooParams.h"
 #include "GooParticleGrid.h"
+#include "GooSkeletal.h"
 #include "ISMObjectPool.h"
 
 /**
@@ -23,10 +24,10 @@ public:
 	
 	
 	
-	GooParticleSystem(UInstancedStaticMeshComponent* InObjectPool, USkeletalMeshComponent* InSkeletalMesh, TArray<FName>* InBones);
+	GooParticleSystem(UInstancedStaticMeshComponent* InObjectPool, USkeletalMeshComponent* InSkeletalMesh, GooSkeletal* InBones);
 	~GooParticleSystem();
 	
-	void SetInitialPool(int32 PoolSize, const FGooParams& GooParams, const std::function<FVector()>& CalculatePosDelegate, const UWorld* World);
+	void SetInitialPool(int32 PoolSize, const FGooParams& GooParams, const std::function<FVector()>& CalculatePosDelegate);
 	void Update(float DeltaTime);
 
 	void CalculateParentAttraction(float DeltaTime);
@@ -34,6 +35,7 @@ public:
 	void CalculateViscosity(float DeltaTime);
 	void UpdateParticlePositions(float DeltaTime);
 	void UpdateDensities();
+	void UpdateDestroyedParticleTransform(GooParticle& Particle);
 	
 	void ReceiveImpulse(FVector Location, float Radius, float Force) const;
 
@@ -43,6 +45,6 @@ private:
 	//TArray<FVector> velocities;
 	//TArray<FVector> predictedPositions;
 	
-	TArray<FName>* Bones;
+	GooSkeletal* Bones;
 };
 

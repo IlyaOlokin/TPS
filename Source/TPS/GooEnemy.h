@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GooParticleSystem.h"
+#include "GooSkeletal.h"
 #include "GameFramework/Actor.h"
 #include "GooEnemy.generated.h"
 
@@ -21,7 +22,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = ParticleSystem)
 	UInstancedStaticMeshComponent* ISM;
 	
-	GooParticleSystem* ParticleSystem;
+	TUniquePtr<GooParticleSystem> ParticleSystem;
+	TUniquePtr<GooSkeletal> SkeletalBones;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
 	int32 MaxParticleCount = 2000;
@@ -41,7 +43,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
 	FGooParams GooParams;
 
-	TArray<FName> Bones;
 	FTimerHandle SpawnTimerHandle;
 	
 	UPROPERTY(BlueprintAssignable, Category = "Events")

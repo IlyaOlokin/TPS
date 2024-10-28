@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GooSkeletal.h"
 
 /**
  * 
@@ -15,11 +16,15 @@ public:
 	FVector Scale;
 	int32 Index;
 	
-	bool Active;
+	bool IsAlive;
 	float Density;
 	FVector PredictedPosition;
 	FVector Pressure;
-
+	
+	FName ParentBoneName;
+	
+	float ParentBoneOffsetDist;
+	FQuat ParentBoneOffsetRot;
 	
 	GooParticle(UInstancedStaticMeshComponent* InISM, int32 ISMIndex);
 	~GooParticle();
