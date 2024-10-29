@@ -4,11 +4,12 @@
 #include "GooParticleSystem.h"
 
 #include "GooCalculator.h"
+#include "GooSkeletal.h"
 #include "ISMObjectPool.h"
 #include "Components/InstancedStaticMeshComponent.h"
 
 
-GooParticleSystem::GooParticleSystem(UInstancedStaticMeshComponent* InObjectPool, USkeletalMeshComponent* InSkeletalMesh, TArray<FName>* InBones)
+GooParticleSystem::GooParticleSystem(UInstancedStaticMeshComponent* InObjectPool, USkeletalMeshComponent* InSkeletalMesh, GooSkeletal* InBones)
 {
 	ObjectPool = new ISMObjectPool(InObjectPool);
 	SkeletalMesh = InSkeletalMesh;
@@ -20,11 +21,11 @@ GooParticleSystem::~GooParticleSystem()
 	delete ObjectPool;
 }
 
-void GooParticleSystem::SetInitialPool(int32 PoolSize, const FGooParams& InGooParams, const std::function<FVector()>& CalculatePosDelegate, const UWorld* World)
+void GooParticleSystem::SetInitialPool(int32 PoolSize, const FGooParams& InGooParams, const std::function<FVector()>& CalculatePosDelegate)
 {
 	for (int32 i = 0; i < PoolSize; ++i)
 	{
-		int32 newIndex = ObjectPool->GetInstance(CalculatePosDelegate(), InGooParams, World);
+		int32 newIndex = ObjectPool->GetInstance(CalculatePosDelegate(), InGooParams);
 		//densities.Add(0);
 		//velocities.Add(FVector::Zero());
 		//predictedPositions.Add(FVector::Zero());
@@ -109,20 +110,20 @@ void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
 		float MinDistance = FLT_MAX;
 		FVector ClosestPointOnBone;
 		
-		for (const auto BoneName : *Bones)
+		for (const FBonePair BonePair : Bones->BonePairs)
 		{
-			const int32 BoneIndex = SkeletalMesh->GetBoneIndex(BoneName);
+			const int32 BoneIndex = SkeletalMesh->GetBoneIndex(BonePair.Bone1);
 			if (BoneIndex == INDEX_NONE)
 			{
 				continue;
 			}
 			
-			FVector BoneStart = SkeletalMesh->GetBoneLocation(BoneName, EBoneSpaces::WorldSpace);
+			FVector BoneStart = SkeletalMesh->GetBoneLocation(BonePair.Bone1, EBoneSpaces::WorldSpace);
 			if (BoneIndex + 1 >= SkeletalMesh->GetNumBones())
 			{
 				continue;
 			}
-			FVector BoneEnd = SkeletalMesh->GetSocketLocation(SkeletalMesh->GetBoneName(BoneIndex + 1));
+			FVector BoneEnd = SkeletalMesh->GetSocketLocation(BonePair.Bone2);
 
 			FVector BoneDirection = BoneEnd - BoneStart;
 			if (!BoneDirection.IsNearlyZero())
@@ -209,7 +210,11 @@ void GooParticleSystem::UpdateParticlePositions(float DeltaTime)
 {
 	for (const auto ParticleIndex : ObjectPool->ActiveInstances)
 	{
-		if (!ObjectPool->Particles[ParticleIndex].Active) continue;
+		if (!ObjectPool->Particles[ParticleIndex].IsAlive)
+		{
+			UpdateDestroyedParticleTransform(ObjectPool->Particles[ParticleIndex]);
+			continue;
+		}
 		ObjectPool->Particles[ParticleIndex].Position +=  ObjectPool->Particles[ParticleIndex].Velocity * DeltaTime;
 		ObjectPool->Particles[ParticleIndex].Update(DeltaTime);
 	}
@@ -225,6 +230,22 @@ void GooParticleSystem::UpdateDensities()
 		if (density != 0)
 			ObjectPool->Particles[ParticleIndex].Density = density;
 	});
+}
+
+void GooParticleSystem::UpdateDestroyedParticleTransform(GooParticle& Particle)
+{
+	if (Particle.ParentBoneName.IsNone()) return;
+	
+	const FTransform BoneTransform = SkeletalMesh->GetBoneTransform(Particle.ParentBoneName);
+
+	const FVector Right = BoneTransform.GetRotation().GetRightVector();
+	FVector RotatedVector = Particle.ParentBoneOffsetRot.RotateVector(Right);
+	RotatedVector.Normalize();
+	
+	const FVector NewPosition = BoneTransform.GetLocation() + RotatedVector * Particle.ParentBoneOffsetDist;
+	
+	Particle.Position = NewPosition;
+	Particle.UpdateInstancePos();
 }
 
 void GooParticleSystem::ReceiveImpulse(FVector Location, float Radius, float Force) const

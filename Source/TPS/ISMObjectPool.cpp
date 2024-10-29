@@ -16,46 +16,7 @@ ISMObjectPool::~ISMObjectPool()
 {
 }
 
-/*int32 ISMObjectPool::GetInstance(const FVector Pos, const FGooParams& GooParams, const UWorld* World)
-{
-	int32 InstanceIndex;
-	FTransform DefaultTransform(Pos);
-	DefaultTransform.SetScale3D(FVector(GooParams.size));
-	
-	if (!FreeInstances.IsEmpty())
-	{
-		FreeInstances.Dequeue(InstanceIndex);  
-		ActiveInstances.Add(InstanceIndex);
-		Particles[InstanceIndex].Position = DefaultTransform.GetLocation();
-		Particles[InstanceIndex].Scale = FVector(GooParams.size);
-		//Particles[InstanceIndex].UpdateInstanceScale(FVector(GooParams.size));
-		Particles[InstanceIndex].Velocity = FVector::Zero();
-		Particles[InstanceIndex].Density = 0;
-		Particles[InstanceIndex].PredictedPosition = FVector::Zero();
-		Particles[InstanceIndex].Active = true;
-		return InstanceIndex;
-	}
-	else
-	{
-		InstanceIndex = ISM->AddInstance(DefaultTransform, true);
-		
-		GooParticle Particle = GooParticle(ISM, InstanceIndex);
-		Particle.Position = DefaultTransform.GetLocation() /*+ ISM->GetOwner()->GetActorLocation()#1#;
-		Particle.Scale = FVector(GooParams.size);
-		//Particle.UpdateInstanceScale(FVector(GooParams.size));
-		Particle.Velocity = FVector::Zero();
-		Particle.Density = 0;
-		Particle.PredictedPosition = FVector::Zero();
-		Particle.Active = true;
-		Particles.Add(Particle);
-		
-		ActiveInstances.Add(InstanceIndex);
-		
-		return InstanceIndex;
-	}
-}*/
-
-int32 ISMObjectPool::GetInstance(const FVector Pos, const FGooParams& GooParams, const UWorld* World)
+int32 ISMObjectPool::GetInstance(const FVector Pos, const FGooParams& GooParams)
 {
 	FTransform DefaultTransform(Pos);
 	DefaultTransform.SetScale3D(FVector::Zero());
@@ -65,13 +26,13 @@ int32 ISMObjectPool::GetInstance(const FVector Pos, const FGooParams& GooParams,
 	if (!FreeInstances.IsEmpty())
 	{
 		FreeInstances.Dequeue(InstanceIndex);
-		InitializeParticle(Particles[InstanceIndex], DefaultTransform, GooParams.size);
+		InitializeParticle(Particles[InstanceIndex], DefaultTransform);
 	}
 	else
 	{
 		InstanceIndex = ISM->AddInstance(DefaultTransform, true);
 		GooParticle NewParticle = GooParticle(ISM, InstanceIndex);
-		InitializeParticle(NewParticle, DefaultTransform, GooParams.size);
+		InitializeParticle(NewParticle, DefaultTransform);
 		Particles.Add(NewParticle);
 	}
 
@@ -82,21 +43,32 @@ int32 ISMObjectPool::GetInstance(const FVector Pos, const FGooParams& GooParams,
 	return InstanceIndex;
 }
 
-void ISMObjectPool::InitializeParticle(GooParticle& Particle, const FTransform& Transform, float Size)
+void ISMObjectPool::InitializeParticle(GooParticle& Particle, const FTransform& Transform)
 {
 	Particle.Position = Transform.GetLocation();
 	Particle.Scale = FVector::Zero();
 	Particle.Velocity = FVector::Zero();
 	Particle.Density = 0;
 	Particle.PredictedPosition = FVector::Zero();
-	Particle.Active = true;
+	Particle.IsAlive = true;
 }
 
-void ISMObjectPool::ReturnInstance(int32 InstanceIndex, float HealDelay, const UWorld* World)
+void ISMObjectPool::ReturnInstance(int32 InstanceIndex, float HealDelay, const FName ParentBone, const FTransform& ParentTransform, const UWorld* World)
 {
 	Particles[InstanceIndex].Scale = FVector::Zero();
 	Particles[InstanceIndex].UpdateInstanceScale();
-	Particles[InstanceIndex].Active = false;
+	Particles[InstanceIndex].IsAlive = false;
+	Particles[InstanceIndex].ParentBoneName = ParentBone;
+	
+	
+	FVector ParentRightVector = ParentTransform.GetRotation().GetRightVector();
+	FVector VectorToParticle = Particles[InstanceIndex].Position - ParentTransform.GetLocation();
+	
+	ParentRightVector.Normalize();
+	VectorToParticle.Normalize();
+	
+	Particles[InstanceIndex].ParentBoneOffsetRot = FQuat::FindBetweenNormals(ParentRightVector, VectorToParticle);
+	Particles[InstanceIndex].ParentBoneOffsetDist = (Particles[InstanceIndex].Position - ParentTransform.GetLocation()).Size();
 	
 	FTimerHandle TimerHandle;
 	FTimerDelegate TimerDel;
