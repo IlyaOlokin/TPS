@@ -17,13 +17,14 @@ void GooParticle::StartScaleUp(float TargetSize, float Duration)
 	bIsScaling = true;
 }
 
-void GooParticle::Update(float DeltaTime)
+void GooParticle::Update(float DeltaTime, float DistToPlayerCamera)
 {
 	if (bIsScaling)
 	{
 		TickScaleUp(DeltaTime);
 	}
-	UpdateInstanceTransform();
+
+	UpdateInstanceTransform(DistToPlayerCamera);
 }
 
 void GooParticle::TickScaleUp(float DeltaTime)
@@ -39,13 +40,14 @@ void GooParticle::TickScaleUp(float DeltaTime)
 	}
 }
 
-void GooParticle::UpdateInstanceTransform()
+void GooParticle::UpdateInstanceTransform(float DistToPlayerCamera)
 {
 	if (!ISM) return;
 
 	FTransform InstanceTransform;
 	if (ISM->GetInstanceTransform(Index, InstanceTransform, true))
 	{
+		if ((InstanceTransform.GetLocation() - Position).Size() < CalculateUpdateTransformThreshold(DistToPlayerCamera)) return;
 		InstanceTransform.SetLocation(Position);
 		InstanceTransform.SetScale3D(Scale);
 		ISM->UpdateInstanceTransform(Index, InstanceTransform, true, false, false);
@@ -74,4 +76,11 @@ void GooParticle::UpdateInstanceScale()
 		InstanceTransform.SetScale3D(Scale);
 		ISM->UpdateInstanceTransform(Index, InstanceTransform, true, false, false);
 	}
+}
+
+float GooParticle::CalculateUpdateTransformThreshold(float DistToPlayerCamera)
+{
+	const float RemappedValue = MinThreshold + (DistToPlayerCamera - MinDistanceToCamera) * (MaxThreshold - MinThreshold)/ (MaxDistanceToCamera - MinDistanceToCamera);
+	
+	return FMath::Clamp(RemappedValue, MinThreshold, MaxThreshold);
 }

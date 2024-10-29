@@ -39,4 +39,16 @@ struct TPS_API FGooParams
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float maxAttractionDistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float minDistanceToCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float maxDistanceToCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float minThreshold;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float maxThreshold;
 };

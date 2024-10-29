@@ -9,11 +9,13 @@
 #include "Components/InstancedStaticMeshComponent.h"
 
 
-GooParticleSystem::GooParticleSystem(UInstancedStaticMeshComponent* InObjectPool, USkeletalMeshComponent* InSkeletalMesh, GooSkeletal* InBones)
+GooParticleSystem::GooParticleSystem(UInstancedStaticMeshComponent* InObjectPool, USkeletalMeshComponent* InSkeletalMesh,
+	GooSkeletal* InBones, const TObjectPtr<APlayerCameraManager>& InPlayerCamera)
 {
 	ObjectPool = new ISMObjectPool(InObjectPool);
 	SkeletalMesh = InSkeletalMesh;
 	Bones = InBones;
+	PlayerCamera = InPlayerCamera;
 }
 
 GooParticleSystem::~GooParticleSystem()
@@ -215,8 +217,9 @@ void GooParticleSystem::UpdateParticlePositions(float DeltaTime)
 			UpdateDestroyedParticleTransform(ObjectPool->Particles[ParticleIndex]);
 			continue;
 		}
-		ObjectPool->Particles[ParticleIndex].Position +=  ObjectPool->Particles[ParticleIndex].Velocity * DeltaTime;
-		ObjectPool->Particles[ParticleIndex].Update(DeltaTime);
+		ObjectPool->Particles[ParticleIndex].Position += ObjectPool->Particles[ParticleIndex].Velocity * DeltaTime;
+		ObjectPool->Particles[ParticleIndex].Update(DeltaTime,
+			(ObjectPool->Particles[ParticleIndex].Position - PlayerCamera->GetCameraLocation()).Size());
 	}
 }
 

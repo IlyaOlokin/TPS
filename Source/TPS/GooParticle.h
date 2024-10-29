@@ -11,6 +11,11 @@
 class TPS_API GooParticle
 {
 public:
+	inline static float MinDistanceToCamera = 50.0f;
+	inline static float MaxDistanceToCamera = 2000.0f;
+	inline static float MinThreshold = 0.0f;
+	inline static float MaxThreshold = 2.0f;
+
 	FVector Position;
 	FVector Velocity;
 	FVector Scale;
@@ -30,10 +35,11 @@ public:
 	~GooParticle();
 
 	void StartScaleUp(float TargetSize, float Duration);
-	void Update(float DeltaTime);
-	void UpdateInstanceTransform();
+	void Update(float DeltaTime, float DistToPlayerCamera);
+	void UpdateInstanceTransform(float DistToPlayerCamera);
 	void UpdateInstancePos();
 	void UpdateInstanceScale();
+	float CalculateUpdateTransformThreshold(float DistToPlayerCamera);
 	
 private:
 	UInstancedStaticMeshComponent* ISM;

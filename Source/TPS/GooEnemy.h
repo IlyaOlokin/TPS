@@ -24,6 +24,7 @@ protected:
 	
 	TUniquePtr<GooParticleSystem> ParticleSystem;
 	TUniquePtr<GooSkeletal> SkeletalBones;
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
 	int32 MaxParticleCount = 2000;

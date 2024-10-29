@@ -5,6 +5,7 @@
 
 #include "GooSkeletal.h"
 #include "Components/InstancedStaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AGooEnemy::AGooEnemy()
 {
@@ -36,11 +37,24 @@ void AGooEnemy::BeginPlay()
 	};
 
 	SkeletalBones = MakeUnique<GooSkeletal>(SkeletalMesh, BonePairs);
-	ParticleSystem =  MakeUnique<GooParticleSystem>(ISM, SkeletalMesh, SkeletalBones.Get());
+	
+	const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	TObjectPtr<APlayerCameraManager> PlayerCamera;
+	if (PlayerController && PlayerController->PlayerCameraManager)
+	{
+		PlayerCamera = PlayerController->PlayerCameraManager;
+	}
+	
+	ParticleSystem =  MakeUnique<GooParticleSystem>(ISM, SkeletalMesh, SkeletalBones.Get(), PlayerCamera);
+	
 	const std::function<FVector()> CalculatePosDelegate = std::bind(&AGooEnemy::CalculateSpawnLocation, this);
-
 	ParticleSystem->SetInitialPool(FMath::Min(InitialPoolSize, MaxParticleCount), GooParams,  CalculatePosDelegate);
 	StartSpawning();
+
+	GooParticle::MinDistanceToCamera = GooParams.minDistanceToCamera;
+	GooParticle::MaxDistanceToCamera = GooParams.maxDistanceToCamera;
+	GooParticle::MinThreshold = GooParams.minThreshold;
+	GooParticle::MaxThreshold = GooParams.maxThreshold;
 }
 
 void AGooEnemy::StartSpawning()
