@@ -27,4 +27,5 @@ public:
 	static float CalculateSharedPressure(float densityA, float densityB, const FGooParams& GooParams);
 	static float ConvertDensityToPressure(float density, const FGooParams& GooParams);
 	static FVector ClosestPointOnLineSegment(const FVector& LineStart, const FVector& LineEnd, const FVector& Point);
+	static bool IsPointInView(const TObjectPtr<APlayerCameraManager>& CameraManager, const FVector& WorldPoint);
 };
