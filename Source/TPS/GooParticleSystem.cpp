@@ -61,6 +61,8 @@ void GooParticleSystem::Update(float DeltaTime)
 	*/
 	
 	double StartTime, EndTime, ElapsedTime;
+
+	DeltaTime = FMath::Min(DeltaTime, 0.016f);
 	
 	StartTime = FPlatformTime::Seconds();
 	CalculateParentAttraction(DeltaTime);
