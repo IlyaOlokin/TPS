@@ -51,4 +51,7 @@ struct TPS_API FGooParams
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float maxThreshold;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float offViewThreshold;
 };

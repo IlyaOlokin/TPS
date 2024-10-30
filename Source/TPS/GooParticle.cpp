@@ -17,14 +17,14 @@ void GooParticle::StartScaleUp(float TargetSize, float Duration)
 	bIsScaling = true;
 }
 
-void GooParticle::Update(float DeltaTime, float DistToPlayerCamera)
+void GooParticle::Update(float DeltaTime, float DistToPlayerCamera, bool bIsInView)
 {
 	if (bIsScaling)
 	{
 		TickScaleUp(DeltaTime);
 	}
 
-	UpdateInstanceTransform(DistToPlayerCamera);
+	UpdateInstanceTransform(DistToPlayerCamera, bIsInView);
 }
 
 void GooParticle::TickScaleUp(float DeltaTime)
@@ -40,14 +40,17 @@ void GooParticle::TickScaleUp(float DeltaTime)
 	}
 }
 
-void GooParticle::UpdateInstanceTransform(float DistToPlayerCamera)
+void GooParticle::UpdateInstanceTransform(float DistToPlayerCamera, bool bIsInView)
 {
 	if (!ISM) return;
 
 	FTransform InstanceTransform;
 	if (ISM->GetInstanceTransform(Index, InstanceTransform, true))
 	{
-		if ((InstanceTransform.GetLocation() - Position).Size() < CalculateUpdateTransformThreshold(DistToPlayerCamera)) return;
+		double Treshold = (InstanceTransform.GetLocation() - Position).Size();
+		if (!bIsInView && Treshold < OffViewThreshold) return;
+		if (Treshold < CalculateUpdateTransformThreshold(DistToPlayerCamera)) return;
+		
 		InstanceTransform.SetLocation(Position);
 		InstanceTransform.SetScale3D(Scale);
 		ISM->UpdateInstanceTransform(Index, InstanceTransform, true, false, false);

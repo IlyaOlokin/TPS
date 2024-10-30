@@ -15,6 +15,7 @@ public:
 	inline static float MaxDistanceToCamera = 2000.0f;
 	inline static float MinThreshold = 0.0f;
 	inline static float MaxThreshold = 2.0f;
+	inline static float OffViewThreshold = 5.0f;
 
 	FVector Position;
 	FVector Velocity;
@@ -35,8 +36,8 @@ public:
 	~GooParticle();
 
 	void StartScaleUp(float TargetSize, float Duration);
-	void Update(float DeltaTime, float DistToPlayerCamera);
-	void UpdateInstanceTransform(float DistToPlayerCamera);
+	void Update(float DeltaTime, float DistToPlayerCamera, bool bIsInView);
+	void UpdateInstanceTransform(float DistToPlayerCamera, bool bIsInView);
 	void UpdateInstancePos();
 	void UpdateInstanceScale();
 	float CalculateUpdateTransformThreshold(float DistToPlayerCamera);

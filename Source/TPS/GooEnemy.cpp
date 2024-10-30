@@ -55,6 +55,7 @@ void AGooEnemy::BeginPlay()
 	GooParticle::MaxDistanceToCamera = GooParams.maxDistanceToCamera;
 	GooParticle::MinThreshold = GooParams.minThreshold;
 	GooParticle::MaxThreshold = GooParams.maxThreshold;
+	GooParticle::OffViewThreshold = GooParams.offViewThreshold;
 }
 
 void AGooEnemy::StartSpawning()

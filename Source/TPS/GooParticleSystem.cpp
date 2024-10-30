@@ -85,12 +85,6 @@ void GooParticleSystem::Update(float DeltaTime)
 	EndTime = FPlatformTime::Seconds();
 	ElapsedTime = EndTime - StartTime;
 	UE_LOG(LogTemp, Log, TEXT("CalculatePressure: %f"), ElapsedTime);
-
-	/*StartTime = FPlatformTime::Seconds();
-	CalculateViscosity(DeltaTime);
-	EndTime = FPlatformTime::Seconds();
-	ElapsedTime = EndTime - StartTime;
-	UE_LOG(LogTemp, Log, TEXT("CalculateViscosity: %f"), ElapsedTime);*/
 	
 	StartTime = FPlatformTime::Seconds();
 	UpdateParticlePositions(DeltaTime);
@@ -98,7 +92,7 @@ void GooParticleSystem::Update(float DeltaTime)
 	ElapsedTime = EndTime - StartTime;
 	UE_LOG(LogTemp, Log, TEXT("UpdateParticlePositions: %f"), ElapsedTime);
 	
-	//ObjectPool->ISM->MarkRenderStateDirty();
+	ObjectPool->ISM->MarkRenderStateDirty();
 }
 
 void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
@@ -163,21 +157,6 @@ void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
 	});
 }
 
-FVector ClosestPointOnLineSegment(const FVector& LineStart, const FVector& LineEnd, const FVector& Point)
-{
-	const FVector LineVector = LineEnd - LineStart;
-	const float LineLengthSquared = LineVector.SizeSquared();
-    
-	// Проецируем точку на линию (но результат будет выходить за пределы отрезка)
-	const float T = FVector::DotProduct(Point - LineStart, LineVector) / LineLengthSquared;
-
-	// Ограничиваем проекцию значениями от 0 до 1, чтобы она осталась на отрезке
-	const float ClampedT = FMath::Clamp(T, 0.0f, 1.0f);
-
-	// Возвращаем ближайшую точку на отрезке
-	return LineStart + ClampedT * LineVector;
-}
-
 void GooParticleSystem::CalculatePressure(float DeltaTime)
 {
 	ParallelFor(ObjectPool->ActiveInstances.Num(), [this, DeltaTime](int32 Index)
@@ -193,21 +172,6 @@ void GooParticleSystem::CalculatePressure(float DeltaTime)
 	});
 }
 
-void GooParticleSystem::CalculateViscosity(float DeltaTime)
-{
-	ParallelFor(ObjectPool->ActiveInstances.Num(), [this, DeltaTime](int32 Index)
-	{
-		const int32 ParticleIndex = ObjectPool->ActiveInstances[Index];
-
-		const FVector viscosityForce = GooCalculator::CalculateViscosityForce(ParticleIndex, *ParticleGrid, *ObjectPool, GooParams);
-		
-		if (viscosityForce.ContainsNaN()) return;
-		
-		ObjectPool->Particles[ParticleIndex].Velocity += viscosityForce * DeltaTime;
-		ObjectPool->Particles[ParticleIndex].Velocity *=  FMath::Pow(1.0f - GooParams.drag, DeltaTime);
-	});
-}
-
 void GooParticleSystem::UpdateParticlePositions(float DeltaTime)
 {
 	for (const auto ParticleIndex : ObjectPool->ActiveInstances)
@@ -219,7 +183,8 @@ void GooParticleSystem::UpdateParticlePositions(float DeltaTime)
 		}
 		ObjectPool->Particles[ParticleIndex].Position += ObjectPool->Particles[ParticleIndex].Velocity * DeltaTime;
 		ObjectPool->Particles[ParticleIndex].Update(DeltaTime,
-			(ObjectPool->Particles[ParticleIndex].Position - PlayerCamera->GetCameraLocation()).Size());
+			(ObjectPool->Particles[ParticleIndex].Position - PlayerCamera->GetCameraLocation()).Size(),
+			GooCalculator::IsPointInView(PlayerCamera, ObjectPool->Particles[ParticleIndex].Position));
 	}
 }
 

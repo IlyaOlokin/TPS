@@ -33,7 +33,6 @@ public:
 
 	void CalculateParentAttraction(float DeltaTime);
 	void CalculatePressure(float DeltaTime);
-	void CalculateViscosity(float DeltaTime);
 	void UpdateParticlePositions(float DeltaTime);
 	void UpdateDensities();
 	void UpdateDestroyedParticleTransform(GooParticle& Particle);
