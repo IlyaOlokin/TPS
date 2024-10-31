@@ -55,7 +55,7 @@ void ISMObjectPool::InitializeParticle(GooParticle& Particle, const FTransform& 
 
 void ISMObjectPool::ReturnInstance(int32 InstanceIndex, float HealDelay, const FName ParentBone, const FTransform& ParentTransform, const UWorld* World)
 {
-	Particles[InstanceIndex].Scale = FVector::Zero();
+	Particles[InstanceIndex].Scale = FVector(0.02f);
 	Particles[InstanceIndex].UpdateInstanceScale();
 	Particles[InstanceIndex].IsAlive = false;
 	Particles[InstanceIndex].ParentBoneName = ParentBone;
