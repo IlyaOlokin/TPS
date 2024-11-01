@@ -55,7 +55,7 @@ void ISMObjectPool::InitializeParticle(GooParticle& Particle, const FTransform& 
 
 void ISMObjectPool::ReturnInstance(int32 InstanceIndex, float HealDelay, const FName ParentBone, const FTransform& ParentTransform, const UWorld* World)
 {
-	Particles[InstanceIndex].Scale = FVector(0.02f);
+	Particles[InstanceIndex].Scale = FVector::Zero();
 	Particles[InstanceIndex].UpdateInstanceScale();
 	Particles[InstanceIndex].IsAlive = false;
 	Particles[InstanceIndex].ParentBoneName = ParentBone;
@@ -67,8 +67,12 @@ void ISMObjectPool::ReturnInstance(int32 InstanceIndex, float HealDelay, const F
 	ParentRightVector.Normalize();
 	VectorToParticle.Normalize();
 	
-	Particles[InstanceIndex].ParentBoneOffsetRot = FQuat::FindBetweenNormals(ParentRightVector, VectorToParticle);
-	Particles[InstanceIndex].ParentBoneOffsetDist = (Particles[InstanceIndex].Position - ParentTransform.GetLocation()).Size();
+	FTransform ReferenceTransform(ParentTransform.GetRotation(), ParentTransform.GetLocation());
+	FTransform ObjectTransform(UE::Math::TQuat<double>(), Particles[InstanceIndex].Position);
+	FTransform RelativeTransform = ObjectTransform.GetRelativeTransform(ReferenceTransform);
+	
+	Particles[InstanceIndex].ParentBoneOffsetRot = RelativeTransform.GetRotation().Rotator();
+	Particles[InstanceIndex].ParentBoneOffset = RelativeTransform.GetLocation();
 	
 	FTimerHandle TimerHandle;
 	FTimerDelegate TimerDel;

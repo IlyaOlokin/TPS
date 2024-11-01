@@ -211,10 +211,12 @@ void GooParticleSystem::UpdateDestroyedParticleTransform(GooParticle& Particle)
 	const FVector Right = BoneTransform.GetRotation().GetRightVector();
 	FVector RotatedVector = Particle.ParentBoneOffsetRot.RotateVector(Right);
 	RotatedVector.Normalize();
+
+	const FTransform NewReferenceTransform(BoneTransform.GetRotation(), BoneTransform.GetLocation());
+	const FTransform RelativeTransform(Particle.ParentBoneOffsetRot, Particle.ParentBoneOffset);
+	const FTransform UpdatedTransform = RelativeTransform * NewReferenceTransform;
 	
-	const FVector NewPosition = BoneTransform.GetLocation() + RotatedVector * Particle.ParentBoneOffsetDist;
-	
-	Particle.Position = NewPosition;
+	Particle.Position = FMath::Lerp(Particle.Position, UpdatedTransform.GetLocation(), 0.8f);
 	Particle.UpdateInstancePos();
 }
 
