@@ -114,7 +114,6 @@ FVector GooCalculator::ClosestPointOnLineSegment(const FVector& LineStart, const
 	return LineStart + ClampedT * LineVector;
 }
 
-
 bool GooCalculator::IsPointInView(const TObjectPtr<APlayerCameraManager>& CameraManager, const FVector& WorldPoint)
 {
 	if (!CameraManager) return false;

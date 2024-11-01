@@ -41,10 +41,6 @@ public:
 
 private:
 	FGooParams GooParams;
-	//TArray<float> densities;
-	//TArray<FVector> velocities;
-	//TArray<FVector> predictedPositions;
-	
 	GooSkeletal* Bones;
 };
 
