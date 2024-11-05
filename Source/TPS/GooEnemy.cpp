@@ -19,21 +19,24 @@ void AGooEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TArray<FBonePair> BonePairs = { {"spine_03", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("spine_03") + 1)},
-		{"spine_02", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("spine_02") + 1)},
-		{"head", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("head") + 1)},
-		{"upperarm_r", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("upperarm_r") + 1)},
-		{"lowerarm_r", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("lowerarm_r") + 1)},
-		{"hand_r", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("hand_r") + 1)},
-		{"upperarm_l", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("upperarm_l") + 1)},
-		{"lowerarm_l", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("lowerarm_l") + 1)},
-		{"hand_l", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("hand_l") + 1)},
-		{"thigh_r", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("thigh_r") + 1)},
-		{"calf_r", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("calf_r") + 1)},
-		{"foot_r", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("foot_r") + 1)},
-		{"thigh_l", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("thigh_l") + 1)},
-		{"calf_l", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("calf_l") + 1)},
-		{"foot_l", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("foot_l") + 1)}
+	TArray<FBonePair> BonePairs = { {"Pelvis", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("Pelvis") + 1)},
+		{"neck", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("neck") + 1)},
+		/*{"r_thigh", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("r_thigh") + 1)},
+		{"r_calf", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("r_calf") + 1)},*/
+		{"r_thigh_001", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("r_thigh_001") + 1)},
+		{"r_calf_001", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("r_calf_001") + 1)},
+		{"r_thigh_002", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("r_thigh_002") + 1)},
+		{"r_calf_002", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("r_calf_002") + 1)},
+		{"r_thigh_003", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("r_thigh_003") + 1)},
+		{"r_calf_003", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("r_calf_003") + 1)},
+		/*{"l_thigh", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("l_thigh") + 1)},
+		{"l_calf", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("l_calf") + 1)},*/
+		{"l_thigh_001", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("l_thigh_001") + 1)},
+		{"l_calf_001", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("l_calf_001") + 1)},
+		{"l_thigh_002", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("l_thigh_002") + 1)},
+		{"l_calf_002", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("l_calf_002") + 1)},
+		{"l_thigh_003", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("l_thigh_003") + 1)},
+		{"l_calf_003", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("l_calf_003") + 1)}
 	};
 
 	SkeletalBones = MakeUnique<GooSkeletal>(SkeletalMesh, BonePairs);

@@ -27,10 +27,7 @@ void GooParticleSystem::SetInitialPool(int32 PoolSize, const FGooParams& InGooPa
 {
 	for (int32 i = 0; i < PoolSize; ++i)
 	{
-		int32 newIndex = ObjectPool->GetInstance(CalculatePosDelegate(), InGooParams);
-		//densities.Add(0);
-		//velocities.Add(FVector::Zero());
-		//predictedPositions.Add(FVector::Zero());
+		ObjectPool->GetInstance(CalculatePosDelegate(), InGooParams);
 	}
 	GooParams = InGooParams;
 
@@ -51,6 +48,9 @@ void GooParticleSystem::Update(float DeltaTime)
 	// 1000 - 75 FPS
 	// 2000 - 50 FPS
 
+	// 1000 - 65 FPS
+	// 2000 - 60 FPS
+
 	/*
 	LogTemp: CalculateParentAttraction :      0.000080 | 0.000062 | 0.000 131
 	LogTemp: ConstructGrid             :      0.000475 | 0.000233 | 0.000 534
@@ -60,37 +60,14 @@ void GooParticleSystem::Update(float DeltaTime)
 	LogTemp: MarkRenderStateDirty      :      0.000003 | 0.000006 | 
 	*/
 	
-	double StartTime, EndTime, ElapsedTime;
+
+	DeltaTime = FMath::Min(DeltaTime, 0.016f);
 	
-	StartTime = FPlatformTime::Seconds();
 	CalculateParentAttraction(DeltaTime);
-	EndTime = FPlatformTime::Seconds();
-	ElapsedTime = EndTime - StartTime;
-	UE_LOG(LogTemp, Log, TEXT("CalculateParentAttraction: %f"), ElapsedTime);
-	
-	StartTime = FPlatformTime::Seconds();
 	ParticleGrid->ConstructGrid(ObjectPool->Particles, ObjectPool->ActiveInstances);
-	EndTime = FPlatformTime::Seconds();
-	ElapsedTime = EndTime - StartTime;
-	UE_LOG(LogTemp, Log, TEXT("ConstructGrid: %f"), ElapsedTime);
-	
-	StartTime = FPlatformTime::Seconds();
 	UpdateDensities();
-	EndTime = FPlatformTime::Seconds();
-	ElapsedTime = EndTime - StartTime;
-	UE_LOG(LogTemp, Log, TEXT("UpdateDensities: %f"), ElapsedTime);
-	
-	StartTime = FPlatformTime::Seconds();
 	CalculatePressure(DeltaTime);
-	EndTime = FPlatformTime::Seconds();
-	ElapsedTime = EndTime - StartTime;
-	UE_LOG(LogTemp, Log, TEXT("CalculatePressure: %f"), ElapsedTime);
-	
-	StartTime = FPlatformTime::Seconds();
 	UpdateParticlePositions(DeltaTime);
-	EndTime = FPlatformTime::Seconds();
-	ElapsedTime = EndTime - StartTime;
-	UE_LOG(LogTemp, Log, TEXT("UpdateParticlePositions: %f"), ElapsedTime);
 	
 	ObjectPool->ISM->MarkRenderStateDirty();
 }
@@ -209,10 +186,12 @@ void GooParticleSystem::UpdateDestroyedParticleTransform(GooParticle& Particle)
 	const FVector Right = BoneTransform.GetRotation().GetRightVector();
 	FVector RotatedVector = Particle.ParentBoneOffsetRot.RotateVector(Right);
 	RotatedVector.Normalize();
+
+	const FTransform NewReferenceTransform(BoneTransform.GetRotation(), BoneTransform.GetLocation());
+	const FTransform RelativeTransform(Particle.ParentBoneOffsetRot, Particle.ParentBoneOffset);
+	const FTransform UpdatedTransform = RelativeTransform * NewReferenceTransform;
 	
-	const FVector NewPosition = BoneTransform.GetLocation() + RotatedVector * Particle.ParentBoneOffsetDist;
-	
-	Particle.Position = NewPosition;
+	Particle.Position = FMath::Lerp(Particle.Position, UpdatedTransform.GetLocation(), 0.8f);
 	Particle.UpdateInstancePos();
 }
 

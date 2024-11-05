@@ -29,8 +29,8 @@ public:
 	
 	FName ParentBoneName;
 	
-	float ParentBoneOffsetDist;
-	FQuat ParentBoneOffsetRot;
+	FVector ParentBoneOffset;
+	FRotator ParentBoneOffsetRot;
 	
 	GooParticle(UInstancedStaticMeshComponent* InISM, int32 ISMIndex);
 	~GooParticle();

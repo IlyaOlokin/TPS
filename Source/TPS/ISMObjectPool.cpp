@@ -67,8 +67,12 @@ void ISMObjectPool::ReturnInstance(int32 InstanceIndex, float HealDelay, const F
 	ParentRightVector.Normalize();
 	VectorToParticle.Normalize();
 	
-	Particles[InstanceIndex].ParentBoneOffsetRot = FQuat::FindBetweenNormals(ParentRightVector, VectorToParticle);
-	Particles[InstanceIndex].ParentBoneOffsetDist = (Particles[InstanceIndex].Position - ParentTransform.GetLocation()).Size();
+	FTransform ReferenceTransform(ParentTransform.GetRotation(), ParentTransform.GetLocation());
+	FTransform ObjectTransform(UE::Math::TQuat<double>(), Particles[InstanceIndex].Position);
+	FTransform RelativeTransform = ObjectTransform.GetRelativeTransform(ReferenceTransform);
+	
+	Particles[InstanceIndex].ParentBoneOffsetRot = RelativeTransform.GetRotation().Rotator();
+	Particles[InstanceIndex].ParentBoneOffset = RelativeTransform.GetLocation();
 	
 	FTimerHandle TimerHandle;
 	FTimerDelegate TimerDel;
@@ -82,5 +86,6 @@ void  ISMObjectPool::ReturnInstanceAfterDelay(int32 InstanceIndex)
 	{
 		FreeInstances.Enqueue(InstanceIndex);
 		Particles[InstanceIndex].Position = FVector(FLT_MAX);
+ 		Particles[InstanceIndex].UpdateInstancePos();
 	}
 }
