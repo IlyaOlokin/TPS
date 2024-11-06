@@ -3,29 +3,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BonePair.h"
 #include "Components/SkeletalMeshComponent.h"
-
-struct FBonePair
-{
-	FName Bone1;
-	FName Bone2;
-    
-	FBonePair(FName InBone1, FName InBone2)
-		: Bone1(InBone1), Bone2(InBone2) {}
-	FBonePair(){}
-};
 
 class TPS_API GooSkeletal
 {
 public:
-	GooSkeletal(USkeletalMeshComponent* InSkeletalMesh, const TArray<FBonePair>& InBonePairs);
+	GooSkeletal(USkeletalMeshComponent* InSkeletalMesh);
 	~GooSkeletal();
-
-	FBonePair FindClosestBonePair(const FVector& ParticlePosition);
-
-	TArray<FBonePair> BonePairs;
+	
+	void SetRootBone(BonePair* InRootBone);
+	void AddBone(BonePair* Bone, BonePair* ParentBone = nullptr);
+	BonePair* GetRootBone() const;
+	const TArray<BonePair*>& GetAllBones() const;
+	
+	void UpdateSkeletal(UWorld* World, float Radius);
+	BonePair* FindClosestBonePair(const FVector& Point);
 
 private:
 	USkeletalMeshComponent* SkeletalMesh;
+	BonePair* RootBone;
+	TArray<BonePair*> BonePairs;
 	
+	void PerformCapsuleTrace(UWorld* World, BonePair* BonePair, float Radius) const;
 };
