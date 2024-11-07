@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BonePair.h"
 #include "Components/SkeletalMeshComponent.h"
+class GooParticleSystem;
 
 class TPS_API GooSkeletal
 {
@@ -17,13 +18,14 @@ public:
 	BonePair* GetRootBone() const;
 	const TArray<BonePair*>& GetAllBones() const;
 	
-	void UpdateSkeletal(UWorld* World, float Radius);
+	void UpdateSkeletal(UWorld* World, const GooParticleSystem* ParticleSystem);
 	BonePair* FindClosestBonePair(const FVector& Point);
+	
 
 private:
 	USkeletalMeshComponent* SkeletalMesh;
 	BonePair* RootBone;
 	TArray<BonePair*> BonePairs;
 	
-	void PerformCapsuleTrace(UWorld* World, BonePair* BonePair, float Radius) const;
+	void PerformCapsuleTrace(UWorld* World, BonePair* BonePair, const GooParticleSystem* ParticleSystem) const;
 };

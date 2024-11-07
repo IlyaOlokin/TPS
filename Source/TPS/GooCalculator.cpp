@@ -128,3 +128,21 @@ bool GooCalculator::IsPointInView(const TObjectPtr<APlayerCameraManager>& Camera
 	
 	return AngleToTarget <= HalfFOV * 1.3f;
 }
+
+float GooCalculator::GetDistanceFromPointToSegment(const FVector& Point, const FVector& SegmentStart, const FVector& SegmentEnd)
+{
+	FVector SegmentDirection = (SegmentEnd - SegmentStart).GetSafeNormal();
+	FVector ProjectionPoint = SegmentStart + FVector::DotProduct(Point - SegmentStart, SegmentDirection) * SegmentDirection;
+
+	bool IsWithinSegment = FVector::DotProduct(ProjectionPoint - SegmentStart, SegmentEnd - SegmentStart) >= 0 &&
+						   FVector::DotProduct(ProjectionPoint - SegmentEnd, SegmentStart - SegmentEnd) >= 0;
+
+	if (IsWithinSegment)
+	{
+		return FVector::Dist(Point, ProjectionPoint);
+	}
+	else
+	{
+		return FMath::Min(FVector::Dist(Point, SegmentStart), FVector::Dist(Point, SegmentEnd));
+	}
+}

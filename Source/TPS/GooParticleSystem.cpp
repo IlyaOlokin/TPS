@@ -83,9 +83,9 @@ void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
 		float MinDistance = FLT_MAX;
 		FVector ClosestPointOnBone;
 		
-		for (const BonePair* BonePair : Bones->GetAllBones())
+		for (BonePair* BonePair : Bones->GetAllBones())
 		{
-			//if (!BonePair.bIsRootBone && !BonePair.bIsActive) continue;
+			if (!BonePair->HasAttraction()) continue;
 			
 			const int32 BoneIndex = SkeletalMesh->GetBoneIndex(BonePair->Bone1);
 			if (BoneIndex == INDEX_NONE)continue;

@@ -3,6 +3,9 @@
 
 #include "GooSkeletal.h"
 
+#include "GooCalculator.h"
+#include "GooParticleSystem.h"
+
 GooSkeletal::GooSkeletal(USkeletalMeshComponent* InSkeletalMesh)
 	: SkeletalMesh(InSkeletalMesh), RootBone(nullptr)
 {
@@ -43,54 +46,44 @@ const TArray<BonePair*>& GooSkeletal::GetAllBones() const
 	return BonePairs;
 }
 
-void GooSkeletal::UpdateSkeletal(UWorld* World, float Radius)
+void GooSkeletal::UpdateSkeletal(UWorld* World, const GooParticleSystem* ParticleSystem)
 {
 	for (const auto BonePair : BonePairs)
 	{
-		PerformCapsuleTrace(World, BonePair, Radius);
+		PerformCapsuleTrace(World, BonePair, ParticleSystem);
 	}
 }
 
-void GooSkeletal::PerformCapsuleTrace(UWorld* World, BonePair* BonePair, float Radius) const
+void GooSkeletal::PerformCapsuleTrace(UWorld* World, BonePair* BonePair, const GooParticleSystem* ParticleSystem) const
 {
 	if (!World) return;
+	if (!BonePair->HasAttraction()) return;
+	
 	const FVector& Start = SkeletalMesh->GetBoneLocation(BonePair->Bone1);
 	const FVector& End = SkeletalMesh->GetBoneLocation(BonePair->Bone2);
 	
-	float HalfHeight = (End - Start).Size() / 2.0f;
-	FCollisionShape CapsuleShape = FCollisionShape::MakeCapsule(Radius, HalfHeight);
-	
-	TArray<FHitResult> HitResults;
-	bool bHit = World->SweepMultiByChannel(
-		HitResults,
-		Start,
-		End, 
-		FQuat::Identity,
-		ECC_GameTraceChannel2,
-		CapsuleShape
-	);
-	
-	if (bHit)
+	int count = 0;
+	ParallelFor(ParticleSystem->ObjectPool->ActiveInstances.Num(), [&](int32 Index)
 	{
-		int count = 0;
-		for (const FHitResult& Hit : HitResults)
+		const int32 ParticleIndex = ParticleSystem->ObjectPool->ActiveInstances[Index];
+		GooParticle& Particle = ParticleSystem->ObjectPool->Particles[ParticleIndex];
+		if (Particle.IsAlive)
 		{
-			const int32 InstanceIndex = Hit.Item;
-			count++;
-			
+			const float Dist = GooCalculator::GetDistanceFromPointToSegment(Particle.Position, Start, End);
+			if (Dist < BonePair->Radius) count++;
 		}
-		//UE_LOG(LogTemp, Log, TEXT("Объектов в капсуле: %d"), count);
-		
-	}
-
+	});
+	BonePair->UpdateParticleCount(count);
+	//UE_LOG(LogTemp, Log, TEXT("Объектов в капсуле: %d"), count);
+	
 	// Опционально: отрисовка капсулы для визуализации
 	DrawDebugCapsule(
 		World,
 		(Start + End) / 2,
-		HalfHeight,
-		Radius,
+		(End - Start).Size() / 2.0f,
+		BonePair->Radius,
 		FRotationMatrix::MakeFromZ(End - Start).ToQuat(),
-		FColor::Green,
+		BonePair->IsActive()? FColor::Green : FColor::Red,
 		false,
 		0.2f
 	);
@@ -103,6 +96,8 @@ BonePair* GooSkeletal::FindClosestBonePair(const FVector& Point)
 
 	for (BonePair* BonePair : BonePairs)
 	{
+		if (!BonePair->HasAttraction()) continue;
+
 		int32 Bone1Index = SkeletalMesh->GetBoneIndex(BonePair->Bone1);
 		int32 Bone2Index = SkeletalMesh->GetBoneIndex(BonePair->Bone2);
 
@@ -114,26 +109,15 @@ BonePair* GooSkeletal::FindClosestBonePair(const FVector& Point)
 		FVector Bone1Pos = SkeletalMesh->GetBoneLocation(BonePair->Bone1, EBoneSpaces::WorldSpace);
 		FVector Bone2Pos = SkeletalMesh->GetBoneLocation(BonePair->Bone2, EBoneSpaces::WorldSpace);
 
-		FVector SegmentDirection = (Bone2Pos - Bone1Pos).GetSafeNormal();
-		FVector ProjectionPoint = Bone1Pos + FVector::DotProduct(Point - Bone1Pos, SegmentDirection) * SegmentDirection;
+		float DistanceToSegment = GooCalculator::GetDistanceFromPointToSegment(Point, Bone1Pos, Bone2Pos);
 
-		bool IsWithinSegment = FVector::DotProduct(ProjectionPoint - Bone1Pos, Bone2Pos - Bone1Pos) >= 0 &&
-							   FVector::DotProduct(ProjectionPoint - Bone2Pos, Bone1Pos - Bone2Pos) >= 0;
-
-		if (IsWithinSegment)
+		if (DistanceToSegment < MinDistanceAlongSegment)
 		{
-			const float DistanceToSegment = FVector::Dist(Point, ProjectionPoint);
-
-			if (DistanceToSegment < MinDistanceAlongSegment)
-			{
-				MinDistanceAlongSegment = DistanceToSegment;
-
-				
-				ClosestBonePair = BonePair;
-			}
+			MinDistanceAlongSegment = DistanceToSegment;
+			ClosestBonePair = BonePair;
 		}
 	}
-	
+
 	return ClosestBonePair;
 }
 

@@ -40,11 +40,18 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = ParticleSystem)
 	float RaycastDistance = 1000;
+
+	UPROPERTY(EditAnywhere, Category = Skeletal)
+	float RootBoneRadius = 75;
+
+	UPROPERTY(EditAnywhere, Category = Skeletal)
+	float BoneRadius = 50;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
 	FGooParams GooParams;
 
 	FTimerHandle SpawnTimerHandle;
+	FTimerHandle UpdateBonesTimerHandle;
 	
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHitEvent OnHitEvent;
@@ -53,6 +60,7 @@ protected:
 
 	void StartSpawning();
 	FVector CalculateSpawnLocation();
+	void UpdateBones() const;
 
 public:	
 	// Sets default values for this actor's properties
