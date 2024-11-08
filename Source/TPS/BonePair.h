@@ -11,8 +11,9 @@ public:
 	FName Bone2;
 
 	float Radius;
+	int ActiveThreshold;
 	
-	BonePair(FName InBone1, FName InBone2, float Radius, bool bIsRootBone = false);
+	BonePair(FName InBone1, FName InBone2, float Radius, int ActiveThreshold, bool bIsRootBone = false);
 
 	FName GetBoneName() const;
 	void AddChildBone(BonePair* LinkedBone);

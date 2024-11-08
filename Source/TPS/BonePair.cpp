@@ -3,8 +3,8 @@
 
 #include "BonePair.h"
 
-BonePair::BonePair(FName InBone1, FName InBone2, float Radius, bool bIsRootBone)
-	: Bone1(InBone1), Bone2(InBone2), Radius(Radius), bIsRootBone(bIsRootBone)
+BonePair::BonePair(FName InBone1, FName InBone2, float Radius, int ActiveThreshold, bool bIsRootBone)
+	: Bone1(InBone1), Bone2(InBone2), Radius(Radius), ActiveThreshold(ActiveThreshold), bIsRootBone(bIsRootBone)
 {
 }
 
@@ -25,11 +25,11 @@ const TArray<BonePair*>& BonePair::GetChildBones() const
 
 void BonePair::UpdateParticleCount(int Count)
 {
-	if (!bIsActive && Count >= 50)
+	if (!bIsActive && Count >= ActiveThreshold)
 	{
 		SetActive(true);
 	}
-	else if (bIsActive && Count <= 25)
+	else if (bIsActive && Count <= ActiveThreshold / 4.0f)
 	{
 		SetActive(false);
 	}
@@ -41,6 +41,7 @@ void BonePair::SetActive(bool bActive)
 	
 	for (auto BonePair : ChildBones)
 	{
+		if (!bIsActive) BonePair->SetActive(bActive);
 		BonePair->SetHasAttraction(bActive);
 	}
 	
@@ -49,6 +50,11 @@ void BonePair::SetActive(bool bActive)
 void BonePair::SetHasAttraction(bool bAttraction)
 {
 	bHasAttraction = bAttraction;
+
+	if (ChildBones.Num() == 1)
+	{
+		ChildBones[0]->SetHasAttraction(bAttraction);
+	}
 }
 
 bool BonePair::HasAttraction() const

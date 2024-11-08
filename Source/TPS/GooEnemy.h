@@ -43,9 +43,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Skeletal)
 	float RootBoneRadius = 75;
+	
+	UPROPERTY(EditAnywhere, Category = Skeletal)
+	int RootBoneActiveThreshold = 100;
 
 	UPROPERTY(EditAnywhere, Category = Skeletal)
 	float BoneRadius = 50;
+
+	UPROPERTY(EditAnywhere, Category = Skeletal)
+	int BoneActiveThreshold = 80;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
 	FGooParams GooParams;
