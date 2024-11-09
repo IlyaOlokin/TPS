@@ -36,31 +36,6 @@ void GooParticleSystem::SetInitialPool(int32 PoolSize, const FGooParams& InGooPa
 
 void GooParticleSystem::Update(float DeltaTime)
 {
-	// 1000 - 47 FPS
-	// 2000 - 15 FPS
-
-	// 1000 - 68 FPS
-	// 2000 - 36 FPS
-
-	// 1000 - 68 FPS
-	// 2000 - 39-50 FPS
-	
-	// 1000 - 75 FPS
-	// 2000 - 50 FPS
-
-	// 1000 - 65 FPS
-	// 2000 - 60 FPS
-
-	/*
-	LogTemp: CalculateParentAttraction :      0.000080 | 0.000062 | 0.000 131
-	LogTemp: ConstructGrid             :      0.000475 | 0.000233 | 0.000 534
-	LogTemp: UpdateDensities           :      0.000216 | 0.000496 | 0.000 914
-	LogTemp: CalculatePressure         :      0.000228 | 0.000711 | 0.001 773
-	LogTemp: UpdateParticlePositions   :      0.003161 | 0.001362 | 0.002 985
-	LogTemp: MarkRenderStateDirty      :      0.000003 | 0.000006 | 
-	*/
-	
-
 	DeltaTime = FMath::Min(DeltaTime, 0.016f);
 	
 	CalculateParentAttraction(DeltaTime);
@@ -82,6 +57,7 @@ void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
 		FVector TotalForce = FVector::ZeroVector;
 		float MinDistance = FLT_MAX;
 		FVector ClosestPointOnBone;
+		const BonePair* ClosestBonePair = nullptr;
 		
 		for (BonePair* BonePair : Bones->GetAllBones())
 		{
@@ -107,13 +83,14 @@ void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
 				{
 					MinDistance = Distance;
 					ClosestPointOnBone = ClosestPoint;
+					ClosestBonePair = BonePair;
 				}
 
 				if (Distance < MaxAttractionDistance)
 				{
 					const float SecondaryAttractionStrength = FMath::Lerp(GooParams.parentAttractionForce, 0.0f, Distance * Distance / (MaxAttractionDistance * MaxAttractionDistance));
 					const FVector SecondaryAttractionDirection = (ClosestPoint - Particle->Position).GetSafeNormal();
-					TotalForce += SecondaryAttractionDirection * (SecondaryAttractionStrength * GooParams.secondaryAttractionStrengthMultiplier);
+					TotalForce += SecondaryAttractionDirection * (SecondaryAttractionStrength * GooParams.secondaryAttractionStrengthMultiplier * BonePair->GetAttractionMultiplier());
 				}
 			}
 		}
@@ -122,7 +99,7 @@ void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
 		                                             MinDistance * MinDistance / (MaxAttractionDistance * MaxAttractionDistance));
 		AttractionStrength = FMath::Max(GooParams.parentAttractionForce * 0.2f, AttractionStrength);
 		const FVector AttractionDirection = (ClosestPointOnBone - Particle->Position).GetSafeNormal();
-		TotalForce += AttractionDirection * AttractionStrength;
+		TotalForce += AttractionDirection * AttractionStrength * FMath::Clamp(ClosestBonePair->GetAttractionMultiplier(), 0 , 1);
 		
 		Particle->Velocity += TotalForce * DeltaTime;
 		Particle->PredictedPosition = Particle->Position + Particle->Velocity * (1 / 120.0f);
@@ -191,7 +168,7 @@ void GooParticleSystem::UpdateDestroyedParticleTransform(GooParticle& Particle)
 	Particle.UpdateInstancePos();
 }
 
-void GooParticleSystem::ReceiveImpulse(FVector Location, float Radius, float Force) const
+void GooParticleSystem::ReceivePointImpulse(const FVector& Location, float Radius, float Force) const
 {
 	for (const auto sector : ParticleGrid->GetNeighboringSectors(Location, Radius))
 	{
@@ -205,4 +182,26 @@ void GooParticleSystem::ReceiveImpulse(FVector Location, float Radius, float For
 			particle->Velocity += dir * (Force * distMultiplier);
 		}
 	}
+}
+
+void GooParticleSystem::ReceiveCapsuleImpulse(const FVector& Location1, const FVector& Location2, float Radius,
+	float Force) const
+{
+	ParallelFor(ObjectPool->ActiveInstances.Num(), [&](int32 Index)
+	{
+		const int32 ParticleIndex = ObjectPool->ActiveInstances[Index];
+		if (!ObjectPool->Particles[ParticleIndex].IsAlive) return;
+
+		const FVector ClosestPointOnLineSegment = GooCalculator::ClosestPointOnLineSegment(Location1, Location2,
+		                                                                                   ObjectPool->Particles[ParticleIndex].Position);
+		FVector DirToPoint = ClosestPointOnLineSegment - ObjectPool->Particles[ParticleIndex].Position;
+
+		if (DirToPoint.Size() < Radius)
+		{
+			double dist = DirToPoint.Size();
+			const float distMultiplier = 1 - (dist * dist / (Radius * Radius));
+			DirToPoint.Normalize();
+			ObjectPool->Particles[ParticleIndex].Velocity += DirToPoint * (Force * distMultiplier);
+		}
+	});
 }

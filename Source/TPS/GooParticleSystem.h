@@ -37,7 +37,9 @@ public:
 	void UpdateDensities();
 	void UpdateDestroyedParticleTransform(GooParticle& Particle);
 	
-	void ReceiveImpulse(FVector Location, float Radius, float Force) const;
+	void ReceivePointImpulse(const FVector& Location, float Radius, float Force) const;
+	void ReceiveCapsuleImpulse(const FVector& Location1, const FVector& Location2,
+		float Radius, float Force) const;
 
 private:
 	FGooParams GooParams;

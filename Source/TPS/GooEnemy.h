@@ -52,6 +52,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Skeletal)
 	int BoneActiveThreshold = 80;
+
+	UPROPERTY(EditAnywhere, Category = Skeletal)
+	float AttractionMultiplierForActiveState =  0.7f;
+
+	UPROPERTY(EditAnywhere, Category = Skeletal)
+	float AttractionMultiplierForNotEnoughParticles = 1.2f;
+
+	UPROPERTY(EditAnywhere, Category = Skeletal)
+	float AttractionMultiplierForDeactivatedState = 4.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
 	FGooParams GooParams;

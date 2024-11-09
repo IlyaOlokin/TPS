@@ -61,6 +61,9 @@ void GooSkeletal::PerformCapsuleTrace(UWorld* World, BonePair* BonePair, const G
 	
 	const FVector& Start = SkeletalMesh->GetBoneLocation(BonePair->Bone1);
 	const FVector& End = SkeletalMesh->GetBoneLocation(BonePair->Bone2);
+
+	FVector Dir = End - Start;
+	Dir.Normalize();
 	
 	int count = 0;
 	ParallelFor(ParticleSystem->ObjectPool->ActiveInstances.Num(), [&](int32 Index)
@@ -69,17 +72,16 @@ void GooSkeletal::PerformCapsuleTrace(UWorld* World, BonePair* BonePair, const G
 		GooParticle& Particle = ParticleSystem->ObjectPool->Particles[ParticleIndex];
 		if (Particle.IsAlive)
 		{
-			const float Dist = GooCalculator::GetDistanceFromPointToSegment(Particle.Position, Start, End);
+			const float Dist = GooCalculator::GetDistanceFromPointToSegment(Particle.Position, Start + Dir * BonePair->Radius, End + (-Dir * BonePair->Radius));
 			if (Dist < BonePair->Radius) count++;
 		}
 	});
-	BonePair->UpdateParticleCount(count);
-	//UE_LOG(LogTemp, Log, TEXT("Объектов в капсуле: %d"), count);
+	BonePair->UpdateParticleCount(count, ParticleSystem, World);
 	
 	// Опционально: отрисовка капсулы для визуализации
 	DrawDebugCapsule(
 		World,
-		(Start + End) / 2,
+		(Start + End) / 2.0f,
 		(End - Start).Size() / 2.0f,
 		BonePair->Radius,
 		FRotationMatrix::MakeFromZ(End - Start).ToQuat(),
