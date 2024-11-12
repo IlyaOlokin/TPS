@@ -71,24 +71,6 @@ FVector GooCalculator::CalculatePressureForce(int index, const GooParticleGrid& 
 	return pressureForce;
 }
 
-FVector GooCalculator::CalculateViscosityForce(int index, const GooParticleGrid& ParticleGrid, const ISMObjectPool& ObjectPool, const FGooParams& GooParams)
-{
-	FVector viscosityForce = FVector::Zero();
-	
-	for (const auto OtherParticle : ParticleGrid.GetNeighboringParticles(&ObjectPool.Particles[index]))
-	{
-
-		FVector offset = ObjectPool.Particles[index].Position - OtherParticle->Position;
-		const float dist = offset.Size();
-		
-		const float influence = ViscositySmoothingKernel(GooParams.smoothingRadius, dist);
-		
-		viscosityForce += (OtherParticle->Velocity - ObjectPool.Particles[index].Velocity) * influence;
-	}
-
-	return viscosityForce * GooParams.viscosityForce;
-}
-
 float GooCalculator::CalculateSharedPressure(float densityA, float densityB, const FGooParams& GooParams)
 {
 	const float pressureA = ConvertDensityToPressure(densityA, GooParams);

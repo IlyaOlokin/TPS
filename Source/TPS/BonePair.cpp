@@ -39,33 +39,19 @@ void BonePair::UpdateParticleCount(int Count, const GooParticleSystem* ParticleS
 	}
 }
 
-void BonePair::SetActive(bool bActive, const GooParticleSystem* ParticleSystem, const UWorld* World)
+void BonePair::SetActive(bool bActive, const GooParticleSystem* ParticleSystem, const UWorld* World, bool bIsNeedToBeHit)
 {
 	bIsActive = bActive;
 	
 	for (auto BonePair : ChildBones)
 	{
-		if (!bIsActive) BonePair->SetActive(bActive, ParticleSystem, World);
+		if (!bIsActive) BonePair->SetActive(bActive, ParticleSystem, World, false);
 		BonePair->SetHasAttraction(bActive);
 	}
 	
-	if (!bIsActive)
+	if (!bIsActive && (bIsRecentlyHit || !bIsNeedToBeHit))
 	{
-		bIsRecentlyDestroyed = true;
-		
-		ParticleSystem->ReceiveCapsuleImpulse(
-		SkeletalMesh->GetBoneLocation(Bone1, EBoneSpaces::WorldSpace),
-		SkeletalMesh->GetBoneLocation(Bone2, EBoneSpaces::WorldSpace),
-		Radius, 300.0f);
-
-		FTimerHandle TimerHandle;
-		World->GetTimerManager().SetTimer(TimerHandle, [this]
-		{
-			bIsRecentlyDestroyed = false;
-			if (HasAttraction()) SetHasAttraction(true);
-		},
-		10.0f,false);
-
+		Destroy(ParticleSystem, World);
 	}
 }
 
@@ -89,6 +75,24 @@ bool BonePair::IsActive() const
 	return bIsActive;
 }
 
+void BonePair::Destroy(const GooParticleSystem* ParticleSystem, const UWorld* World)
+{
+	bIsRecentlyDestroyed = true;
+		
+	ParticleSystem->ReceiveCapsuleImpulse(
+		SkeletalMesh->GetBoneLocation(Bone1, EBoneSpaces::WorldSpace),
+		SkeletalMesh->GetBoneLocation(Bone2, EBoneSpaces::WorldSpace),
+		Radius, 300.0f);
+
+	FTimerHandle TimerHandle;
+	World->GetTimerManager().SetTimer(TimerHandle, [this]
+	{
+		bIsRecentlyDestroyed = false;
+		if (HasAttraction()) SetHasAttraction(true);
+	},
+	10.0f,false);
+}
+
 float BonePair::GetAttractionMultiplier() const
 {
 	if (bIsActive && CurrentParticleCount >= ActiveThreshold * 1.1f)
@@ -107,7 +111,15 @@ float BonePair::GetAttractionMultiplier() const
 	return 1;
 }
 
-void BonePair::ResetRecentlyDestroyed()
+void BonePair::GetHit(const UWorld* World)
 {
-	bIsRecentlyDestroyed = false;
+	bIsRecentlyHit = true;
+	World->GetTimerManager().ClearTimer(HitTimerHandle);
+	World->GetTimerManager().SetTimer(HitTimerHandle, [this]
+	{
+		bIsRecentlyHit = false;
+	},
+	1.5f, false);
 }
+
+

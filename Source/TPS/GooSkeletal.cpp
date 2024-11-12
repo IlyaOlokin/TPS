@@ -56,7 +56,7 @@ void GooSkeletal::UpdateSkeletal(UWorld* World, const GooParticleSystem* Particl
 
 void GooSkeletal::PerformCapsuleTrace(UWorld* World, BonePair* BonePair, const GooParticleSystem* ParticleSystem) const
 {
-	if (!World) return;
+	if (!World || !BonePair) return;
 	if (!BonePair->HasAttraction()) return;
 	
 	const FVector& Start = SkeletalMesh->GetBoneLocation(BonePair->Bone1);
@@ -77,7 +77,12 @@ void GooSkeletal::PerformCapsuleTrace(UWorld* World, BonePair* BonePair, const G
 		}
 	});
 	BonePair->UpdateParticleCount(count, ParticleSystem, World);
-	
+
+	FColor Color = BonePair->IsActive()? FColor::Green : FColor::Red;
+	if (BonePair->IsActive() && BonePair->ActiveThreshold * 0.6f < count && count < BonePair->ActiveThreshold * 1.1f)
+	{
+		Color = FColor::Blue;
+	}
 	// Опционально: отрисовка капсулы для визуализации
 	DrawDebugCapsule(
 		World,
@@ -85,10 +90,11 @@ void GooSkeletal::PerformCapsuleTrace(UWorld* World, BonePair* BonePair, const G
 		(End - Start).Size() / 2.0f,
 		BonePair->Radius,
 		FRotationMatrix::MakeFromZ(End - Start).ToQuat(),
-		BonePair->IsActive()? FColor::Green : FColor::Red,
+		Color,
 		false,
 		0.2f
 	);
+
 }
 
 BonePair* GooSkeletal::FindClosestBonePair(const FVector& Point)
@@ -112,7 +118,8 @@ BonePair* GooSkeletal::FindClosestBonePair(const FVector& Point)
 		FVector Bone2Pos = SkeletalMesh->GetBoneLocation(BonePair->Bone2, EBoneSpaces::WorldSpace);
 
 		float DistanceToSegment = GooCalculator::GetDistanceFromPointToSegment(Point, Bone1Pos, Bone2Pos);
-
+		if (DistanceToSegment > BonePair->Radius) continue;
+		
 		if (DistanceToSegment < MinDistanceAlongSegment)
 		{
 			MinDistanceAlongSegment = DistanceToSegment;

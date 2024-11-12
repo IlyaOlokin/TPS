@@ -18,11 +18,7 @@ class TPS_API GooParticleSystem
 {
 public:
 	
-	USkeletalMeshComponent* SkeletalMesh;
 	ISMObjectPool* ObjectPool;
-	GooParticleGrid* ParticleGrid;
-	TObjectPtr<APlayerCameraManager> PlayerCamera;
-	
 	
 	GooParticleSystem(UInstancedStaticMeshComponent* InObjectPool, USkeletalMeshComponent* InSkeletalMesh,
 		GooSkeletal* InBones, const TObjectPtr<APlayerCameraManager>& InPlayerCamera);
@@ -31,12 +27,6 @@ public:
 	void SetInitialPool(int32 PoolSize, const FGooParams& GooParams, const std::function<FVector()>& CalculatePosDelegate);
 	void Update(float DeltaTime);
 
-	void CalculateParentAttraction(float DeltaTime);
-	void CalculatePressure(float DeltaTime);
-	void UpdateParticlePositions(float DeltaTime);
-	void UpdateDensities();
-	void UpdateDestroyedParticleTransform(GooParticle& Particle);
-	
 	void ReceivePointImpulse(const FVector& Location, float Radius, float Force) const;
 	void ReceiveCapsuleImpulse(const FVector& Location1, const FVector& Location2,
 		float Radius, float Force) const;
@@ -44,5 +34,16 @@ public:
 private:
 	FGooParams GooParams;
 	GooSkeletal* Bones;
+	TObjectPtr<APlayerCameraManager> PlayerCamera;
+	GooParticleGrid* ParticleGrid;
+	USkeletalMeshComponent* SkeletalMesh;
+
+	void CalculateParentAttraction(float DeltaTime);
+	void CalculatePressure(float DeltaTime);
+	void UpdateParticlePositions(float DeltaTime);
+	void UpdateDensities();
+	void UpdateDestroyedParticleTransform(GooParticle& Particle);
+	
+	
 };
 

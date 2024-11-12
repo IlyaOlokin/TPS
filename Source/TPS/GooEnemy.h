@@ -26,44 +26,59 @@ protected:
 	TUniquePtr<GooSkeletal> SkeletalBones;
 	
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ParticleSystem|Spawning")
 	int32 MaxParticleCount = 2000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ParticleSystem|Spawning")
 	int32 InitialPoolSize = 100;
 	
-	UPROPERTY(EditAnywhere, Category = ParticleSystem)
+	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Spawning")
 	int32 ParticlesPerGroup = 50;
 	
-	UPROPERTY(EditAnywhere, Category = ParticleSystem)
+	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Spawning")
 	float SpawnInterval = 10;
 	
-	UPROPERTY(EditAnywhere, Category = ParticleSystem)
+	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Spawning")
 	float RaycastDistance = 1000;
 
-	UPROPERTY(EditAnywhere, Category = Skeletal)
+	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Skeletal")
 	float RootBoneRadius = 75;
 	
-	UPROPERTY(EditAnywhere, Category = Skeletal)
+	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Skeletal")
 	int RootBoneActiveThreshold = 100;
 
-	UPROPERTY(EditAnywhere, Category = Skeletal)
+	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Skeletal")
 	float BoneRadius = 50;
 
-	UPROPERTY(EditAnywhere, Category = Skeletal)
+	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Skeletal")
 	int BoneActiveThreshold = 80;
 
-	UPROPERTY(EditAnywhere, Category = Skeletal)
+	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Skeletal")
 	float AttractionMultiplierForActiveState =  0.7f;
 
-	UPROPERTY(EditAnywhere, Category = Skeletal)
+	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Skeletal")
 	float AttractionMultiplierForNotEnoughParticles = 1.2f;
 
-	UPROPERTY(EditAnywhere, Category = Skeletal)
+	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Skeletal")
 	float AttractionMultiplierForDeactivatedState = 4.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
 	FGooParams GooParams;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "ParticleSystem|Update Treshold")
+	float MinDistanceToCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "ParticleSystem|Update Treshold")
+	float MaxDistanceToCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "ParticleSystem|Update Treshold")
+	float MinThreshold;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "ParticleSystem|Update Treshold")
+	float MaxThreshold;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "ParticleSystem|Update Treshold")
+	float OffViewThreshold;
 
 	FTimerHandle SpawnTimerHandle;
 	FTimerHandle UpdateBonesTimerHandle;

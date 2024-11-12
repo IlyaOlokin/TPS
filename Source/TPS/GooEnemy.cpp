@@ -67,11 +67,11 @@ void AGooEnemy::BeginPlay()
 	
 	GetWorldTimerManager().SetTimer(UpdateBonesTimerHandle, this, &AGooEnemy::UpdateBones, 1.0f, true);
 	
-	GooParticle::MinDistanceToCamera = GooParams.minDistanceToCamera;
-	GooParticle::MaxDistanceToCamera = GooParams.maxDistanceToCamera;
-	GooParticle::MinThreshold = GooParams.minThreshold;
-	GooParticle::MaxThreshold = GooParams.maxThreshold;
-	GooParticle::OffViewThreshold = GooParams.offViewThreshold;
+	GooParticle::MinDistanceToCamera = MinDistanceToCamera;
+	GooParticle::MaxDistanceToCamera = MaxDistanceToCamera;
+	GooParticle::MinThreshold = MinThreshold;
+	GooParticle::MaxThreshold = MaxThreshold;
+	GooParticle::OffViewThreshold = OffViewThreshold;
 
 	BonePair::AttractionMultiplierForActiveState = AttractionMultiplierForActiveState;
 	BonePair::AttractionMultiplierForNotEnoughParticles = AttractionMultiplierForNotEnoughParticles;
@@ -121,6 +121,8 @@ void AGooEnemy::Hit(int32 InstanceIndex) const
 
 	
 	BonePair* ClosestBonePair = SkeletalBones.Get()->FindClosestBonePair(gooParticle.Position);
+	if (ClosestBonePair) ClosestBonePair->GetHit(GetWorld());
+
 	const FName ParentBone = ClosestBonePair ? ClosestBonePair->Bone1 : EName::None;
 	
 	const FTransform BoneTransform1 = SkeletalMesh->GetBoneTransform(ParentBone);
@@ -128,7 +130,8 @@ void AGooEnemy::Hit(int32 InstanceIndex) const
 	
 	ParticleSystem->ObjectPool->ReturnInstance(InstanceIndex, GooParams.healDelay,
 		ParentBone, BoneTransform1, GetWorld());
-	
+
+	SkeletalBones->PerformCapsuleTrace(GetWorld(), ClosestBonePair, ParticleSystem.Get());
 	OnHitEvent.Broadcast(gooParticle.Position);
 }
 

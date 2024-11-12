@@ -94,16 +94,24 @@ void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
 				}
 			}
 		}
-
-		float AttractionStrength = FMath::Lerp(GooParams.parentAttractionForce, 0.0f,
-		                                             MinDistance * MinDistance / (MaxAttractionDistance * MaxAttractionDistance));
-		AttractionStrength = FMath::Max(GooParams.parentAttractionForce * 0.2f, AttractionStrength);
-		const FVector AttractionDirection = (ClosestPointOnBone - Particle->Position).GetSafeNormal();
-		TotalForce += AttractionDirection * AttractionStrength * FMath::Clamp(ClosestBonePair->GetAttractionMultiplier(), 0 , 1);
 		
-		Particle->Velocity += TotalForce * DeltaTime;
+		if (ClosestBonePair)
+		{
+			float AttractionStrength = FMath::Lerp(GooParams.parentAttractionForce, 0.0f,
+											   MinDistance * MinDistance / (MaxAttractionDistance * MaxAttractionDistance));
+			AttractionStrength = FMath::Max(GooParams.parentAttractionForce * 0.2f, AttractionStrength);
+			const FVector AttractionDirection = (ClosestPointOnBone - Particle->Position).GetSafeNormal();
+			TotalForce += AttractionDirection * AttractionStrength * FMath::Clamp(ClosestBonePair->GetAttractionMultiplier(), 0 , 1);
+			Particle->Velocity += TotalForce * DeltaTime;
+			
+		}
+		else
+		{
+			FVector NormVelocity = Particle->Velocity;
+			NormVelocity.Normalize();
+			Particle->Velocity += NormVelocity * 15 * DeltaTime;
+		}
 		Particle->PredictedPosition = Particle->Position + Particle->Velocity * (1 / 120.0f);
-
 	});
 }
 

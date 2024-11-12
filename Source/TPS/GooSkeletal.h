@@ -21,11 +21,11 @@ public:
 	void UpdateSkeletal(UWorld* World, const GooParticleSystem* ParticleSystem);
 	BonePair* FindClosestBonePair(const FVector& Point);
 	
+	void PerformCapsuleTrace(UWorld* World, BonePair* BonePair, const GooParticleSystem* ParticleSystem) const;
 
 private:
 	USkeletalMeshComponent* SkeletalMesh;
 	BonePair* RootBone;
 	TArray<BonePair*> BonePairs;
 	
-	void PerformCapsuleTrace(UWorld* World, BonePair* BonePair, const GooParticleSystem* ParticleSystem) const;
 };

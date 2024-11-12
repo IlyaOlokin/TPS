@@ -29,23 +29,26 @@ public:
 	const TArray<BonePair*>& GetChildBones() const;
 
 	void UpdateParticleCount(int Count, const GooParticleSystem* ParticleSystem, const UWorld* World);
-	void SetActive(bool bActive, const GooParticleSystem* ParticleSystem, const UWorld* World);
+	void SetActive(bool bActive, const GooParticleSystem* ParticleSystem, const UWorld* World, bool bIsNeedToBeHit = true);
 	void SetHasAttraction(bool bAttraction);
 	bool HasAttraction() const;
 	bool IsActive() const;
 	float GetAttractionMultiplier() const;
+	void GetHit(const UWorld* World);
+	void Destroy(const GooParticleSystem* ParticleSystem, const UWorld* World);
 
 private:
 	bool bIsActive = false;
 	bool bHasAttraction = false;
 	bool bIsRootBone = false;
 	bool bIsRecentlyDestroyed = false;
+	bool bIsRecentlyHit = false;
 	
 	FName BoneName;
 	TArray<BonePair*> ChildBones;
 	
 	USkeletalMeshComponent* SkeletalMesh;
-	
-	void ResetRecentlyDestroyed();
+
+	FTimerHandle HitTimerHandle;
 
 };

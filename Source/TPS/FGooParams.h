@@ -20,9 +20,6 @@ struct TPS_API FGooParams
 	float pressureMultiplier;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float viscosityForce;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float parentAttractionForce;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -39,19 +36,4 @@ struct TPS_API FGooParams
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float maxAttractionDistance;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float minDistanceToCamera;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float maxDistanceToCamera;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float minThreshold;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float maxThreshold;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float offViewThreshold;
 };
