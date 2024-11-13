@@ -91,6 +91,7 @@ void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
 					const float SecondaryAttractionStrength = FMath::Lerp(GooParams.parentAttractionForce, 0.0f, Distance * Distance / (MaxAttractionDistance * MaxAttractionDistance));
 					const FVector SecondaryAttractionDirection = (ClosestPoint - Particle->Position).GetSafeNormal();
 					TotalForce += SecondaryAttractionDirection * (SecondaryAttractionStrength * GooParams.secondaryAttractionStrengthMultiplier * BonePair->GetAttractionMultiplier());
+					TotalForce += BonePair->GetAdditionalForceToBoneEnd(Particle->Position, SecondaryAttractionStrength / 15.0f);
 				}
 			}
 		}

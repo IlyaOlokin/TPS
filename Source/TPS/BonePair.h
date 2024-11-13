@@ -21,7 +21,7 @@ public:
 	int ActiveThreshold;
 	
 	BonePair(FName InBone1, FName InBone2, float Radius, int ActiveThreshold,
-		USkeletalMeshComponent* SkeletalMesh, bool bIsRootBone = false);
+		USkeletalMeshComponent* SkeletalMesh, bool bIsRootBone = false, bool bNeedAdditionalForce = false);
 
 	FName GetBoneName() const;
 	void AddChildBone(BonePair* LinkedBone);
@@ -34,6 +34,7 @@ public:
 	bool HasAttraction() const;
 	bool IsActive() const;
 	float GetAttractionMultiplier() const;
+	FVector GetAdditionalForceToBoneEnd(const FVector& Point, const float Force) const;
 	void GetHit(const UWorld* World);
 	void Destroy(const GooParticleSystem* ParticleSystem, const UWorld* World);
 
@@ -41,6 +42,7 @@ private:
 	bool bIsActive = false;
 	bool bHasAttraction = false;
 	bool bIsRootBone = false;
+	bool bNeedAdditionalForce = false;
 	bool bIsRecentlyDestroyed = false;
 	bool bIsRecentlyHit = false;
 	

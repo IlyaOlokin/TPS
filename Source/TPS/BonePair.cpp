@@ -6,8 +6,10 @@
 #include "GooParticleSystem.h"
 
 
-BonePair::BonePair(FName InBone1, FName InBone2, float Radius, int ActiveThreshold,USkeletalMeshComponent* SkeletalMesh, bool bIsRootBone)
-: Bone1(InBone1), Bone2(InBone2), Radius(Radius), ActiveThreshold(ActiveThreshold), bIsRootBone(bIsRootBone), SkeletalMesh(SkeletalMesh)
+BonePair::BonePair(FName InBone1, FName InBone2, float Radius, int ActiveThreshold,USkeletalMeshComponent* SkeletalMesh,
+	bool bIsRootBone, bool bNeedAdditionalForce)
+: Bone1(InBone1), Bone2(InBone2), Radius(Radius), ActiveThreshold(ActiveThreshold),
+bIsRootBone(bIsRootBone), bNeedAdditionalForce(bNeedAdditionalForce), SkeletalMesh(SkeletalMesh)
 {
 }
 
@@ -109,6 +111,19 @@ float BonePair::GetAttractionMultiplier() const
 	}
 
 	return 1;
+}
+
+FVector BonePair::GetAdditionalForceToBoneEnd(const FVector& Point, const float Force) const
+{
+	if (!bNeedAdditionalForce || bIsActive && CurrentParticleCount >= ActiveThreshold * 1.1f)
+	{
+		return FVector::Zero();
+	}
+	
+	FVector Dir = SkeletalMesh->GetBoneLocation(Bone2) - Point;
+	Dir.Normalize();
+
+	return Dir * Force;
 }
 
 void BonePair::GetHit(const UWorld* World)

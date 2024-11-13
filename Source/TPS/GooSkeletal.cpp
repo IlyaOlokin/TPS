@@ -78,12 +78,13 @@ void GooSkeletal::PerformCapsuleTrace(UWorld* World, BonePair* BonePair, const G
 	});
 	BonePair->UpdateParticleCount(count, ParticleSystem, World);
 
+	// Опционально: отрисовка капсулы для визуализации
+
 	FColor Color = BonePair->IsActive()? FColor::Green : FColor::Red;
 	if (BonePair->IsActive() && BonePair->ActiveThreshold * 0.6f < count && count < BonePair->ActiveThreshold * 1.1f)
 	{
 		Color = FColor::Blue;
 	}
-	// Опционально: отрисовка капсулы для визуализации
 	DrawDebugCapsule(
 		World,
 		(Start + End) / 2.0f,

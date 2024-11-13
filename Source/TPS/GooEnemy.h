@@ -26,10 +26,10 @@ protected:
 	TUniquePtr<GooSkeletal> SkeletalBones;
 	
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ParticleSystem|Spawning")
+	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Spawning")
 	int32 MaxParticleCount = 2000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ParticleSystem|Spawning")
+	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Spawning")
 	int32 InitialPoolSize = 100;
 	
 	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Spawning")
@@ -88,16 +88,14 @@ protected:
 	
 	virtual void BeginPlay() override;
 
+
 	void StartSpawning();
 	FVector CalculateSpawnLocation();
 	void UpdateBones() const;
 
 public:	
-	// Sets default values for this actor's properties
 	AGooEnemy();
 	virtual ~AGooEnemy() override;
-
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	void Hit(int32 InstanceIndex) const;
@@ -106,4 +104,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SpawnParticleGroup();
 
+private:
+	void CreateThighAndCalf(const FName& ThighName, const FName& CalfName,
+		float Radius, float Threshold, BonePair* ParentBone) const;
 };

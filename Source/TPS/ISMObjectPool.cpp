@@ -85,7 +85,7 @@ void  ISMObjectPool::ReturnInstanceAfterDelay(int32 InstanceIndex)
  	if (ActiveInstances.Remove(InstanceIndex))
 	{
 		FreeInstances.Enqueue(InstanceIndex);
-		Particles[InstanceIndex].Position = FVector(FLT_MAX);
- 		Particles[InstanceIndex].UpdateInstancePos();
+		/*Particles[InstanceIndex].Position = FVector(FLT_MAX);
+ 		Particles[InstanceIndex].UpdateInstancePos();*/
 	}
 }
