@@ -16,11 +16,12 @@ public:
 	FName Bone1;
 	FName Bone2;
 
+	float AttractionMultiplier = 1;
 	float Radius;
 	int CurrentParticleCount;
 	int ActiveThreshold;
 	
-	BonePair(FName InBone1, FName InBone2, float Radius, int ActiveThreshold,
+	BonePair(FName InBone1, FName InBone2, float Radius, float AttractionMultiplier, int ActiveThreshold,
 		USkeletalMeshComponent* SkeletalMesh, bool bIsRootBone = false, bool bNeedAdditionalForce = false);
 
 	FName GetBoneName() const;

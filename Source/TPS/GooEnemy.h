@@ -6,12 +6,13 @@
 #include "GooParticleSystem.h"
 #include "GooSkeletal.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Character.h"
 #include "GooEnemy.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHitEvent, FVector, HitLocation);
 
 UCLASS()
-class TPS_API AGooEnemy : public AActor
+class TPS_API AGooEnemy : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -106,5 +107,5 @@ public:
 
 private:
 	void CreateThighAndCalf(const FName& ThighName, const FName& CalfName,
-		float Radius, float Threshold, BonePair* ParentBone) const;
+	                        float Radius, float AttractionMultiplier, float Threshold, BonePair* ParentBone) const;
 };

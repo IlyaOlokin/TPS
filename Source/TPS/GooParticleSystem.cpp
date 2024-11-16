@@ -188,7 +188,7 @@ void GooParticleSystem::ReceivePointImpulse(const FVector& Location, float Radiu
 			if (dist > Radius) continue;
 			const float distMultiplier = 1 - (dist * dist / (Radius * Radius));
 			dir.Normalize();
-			particle->Velocity += dir * (Force * distMultiplier);
+			particle->Velocity = dir * (Force * distMultiplier);
 		}
 	}
 }

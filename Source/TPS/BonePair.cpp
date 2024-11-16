@@ -6,9 +6,9 @@
 #include "GooParticleSystem.h"
 
 
-BonePair::BonePair(FName InBone1, FName InBone2, float Radius, int ActiveThreshold,USkeletalMeshComponent* SkeletalMesh,
+BonePair::BonePair(FName InBone1, FName InBone2, float Radius, float AttractionMultiplier, int ActiveThreshold,USkeletalMeshComponent* SkeletalMesh,
 	bool bIsRootBone, bool bNeedAdditionalForce)
-: Bone1(InBone1), Bone2(InBone2), Radius(Radius), ActiveThreshold(ActiveThreshold),
+: Bone1(InBone1), Bone2(InBone2), Radius(Radius), AttractionMultiplier(AttractionMultiplier), ActiveThreshold(ActiveThreshold),
 bIsRootBone(bIsRootBone), bNeedAdditionalForce(bNeedAdditionalForce), SkeletalMesh(SkeletalMesh)
 {
 }
@@ -35,7 +35,7 @@ void BonePair::UpdateParticleCount(int Count, const GooParticleSystem* ParticleS
 	{
 		SetActive(true, ParticleSystem, World);
 	}
-	else if (bIsActive && Count <= ActiveThreshold * 0.6f)
+	else if (bIsActive && Count <= ActiveThreshold * 0.7f)
 	{
 		SetActive(false, ParticleSystem, World);
 	}
@@ -97,17 +97,18 @@ void BonePair::Destroy(const GooParticleSystem* ParticleSystem, const UWorld* Wo
 
 float BonePair::GetAttractionMultiplier() const
 {
+	
 	if (bIsActive && CurrentParticleCount >= ActiveThreshold * 1.1f)
 	{
 		return AttractionMultiplierForActiveState;
 	}
-	if (bIsActive && CurrentParticleCount >= ActiveThreshold * 0.7f)
+	if (bIsActive && CurrentParticleCount >= ActiveThreshold * 0.8f)
 	{
-		return AttractionMultiplierForNotEnoughParticles;
+		return AttractionMultiplierForNotEnoughParticles * AttractionMultiplier;
 	}
 	if (!bIsActive)
 	{
-		return AttractionMultiplierForDeactivatedState;
+		return AttractionMultiplierForDeactivatedState * AttractionMultiplier;
 	}
 
 	return 1;
