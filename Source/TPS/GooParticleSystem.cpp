@@ -100,7 +100,7 @@ void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
 		{
 			float AttractionStrength = FMath::Lerp(GooParams.parentAttractionForce, 0.0f,
 											   MinDistance * MinDistance / (MaxAttractionDistance * MaxAttractionDistance));
-			AttractionStrength = FMath::Max(GooParams.parentAttractionForce * 0.2f, AttractionStrength);
+			AttractionStrength = FMath::Max(GooParams.parentAttractionForce * 0.3f, AttractionStrength);
 			const FVector AttractionDirection = (ClosestPointOnBone - Particle->Position).GetSafeNormal();
 			TotalForce += AttractionDirection * AttractionStrength * FMath::Clamp(ClosestBonePair->GetAttractionMultiplier(), 0 , 1);
 			Particle->Velocity += TotalForce * DeltaTime;
@@ -140,6 +140,7 @@ void GooParticleSystem::UpdateParticlePositions(float DeltaTime)
 			UpdateDestroyedParticleTransform(ObjectPool->Particles[ParticleIndex]);
 			continue;
 		}
+		ObjectPool->Particles[ParticleIndex].Velocity = ObjectPool->Particles[ParticleIndex].Velocity.GetClampedToMaxSize(GooParams.maxParticleSpeed);
 		ObjectPool->Particles[ParticleIndex].Position += ObjectPool->Particles[ParticleIndex].Velocity * DeltaTime;
 		ObjectPool->Particles[ParticleIndex].Update(DeltaTime,
 			(ObjectPool->Particles[ParticleIndex].Position - PlayerCamera->GetCameraLocation()).Size(),

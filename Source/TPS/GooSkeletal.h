@@ -17,6 +17,7 @@ public:
 	void AddBone(BonePair* Bone, BonePair* ParentBone = nullptr);
 	BonePair* GetRootBone() const;
 	const TArray<BonePair*>& GetAllBones() const;
+	const BonePair* GetBonePairByName(FName BoneName) const;
 	
 	void UpdateSkeletal(UWorld* World, const GooParticleSystem* ParticleSystem);
 	BonePair* FindClosestBonePair(const FVector& Point);

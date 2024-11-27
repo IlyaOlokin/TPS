@@ -26,6 +26,9 @@ struct TPS_API FGooParams
 	float drag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float maxParticleSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float healDelay;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

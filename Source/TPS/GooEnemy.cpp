@@ -20,18 +20,18 @@ void AGooEnemy::BeginPlay()
 	Super::BeginPlay();
 
 	SkeletalBones = MakeUnique<GooSkeletal>(SkeletalMesh);
-	SkeletalBones->SetRootBone(new BonePair("neck", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("neck") + 1), RootBoneRadius, 0.5f, RootBoneActiveThreshold, SkeletalMesh, true));
+	SkeletalBones->SetRootBone(new BonePair("neck", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("neck") + 1), RootBoneRadius, 0.5f, RootBoneActiveThresholdByLenght, SkeletalMesh, true));
 
 	
-	//CreateThighAndCalf("r_thigh", "r_calf", BoneRadius, 1.5f, BoneActiveThreshold, SkeletalBones->GetRootBone());
-	CreateThighAndCalf("r_thigh_001", "r_calf_001", BoneRadius, 1, BoneActiveThreshold, SkeletalBones->GetRootBone());
-	CreateThighAndCalf("r_thigh_002", "r_calf_002", BoneRadius, 1, BoneActiveThreshold, SkeletalBones->GetRootBone());
-	CreateThighAndCalf("r_thigh_003", "r_calf_003", BoneRadius, 1, BoneActiveThreshold, SkeletalBones->GetRootBone());
+	CreateThighAndCalf("r_thigh", "r_calf", BoneRadius, 1.5f, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
+	CreateThighAndCalf("r_thigh_001", "r_calf_001", BoneRadius, 1, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
+	CreateThighAndCalf("r_thigh_002", "r_calf_002", BoneRadius, 1, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
+	CreateThighAndCalf("r_thigh_003", "r_calf_003", BoneRadius, 1, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
 	
-	//CreateThighAndCalf("l_thigh", "l_calf", BoneRadius, 1.5f, BoneActiveThreshold, SkeletalBones->GetRootBone());
-	CreateThighAndCalf("l_thigh_001", "l_calf_001", BoneRadius, 1, BoneActiveThreshold, SkeletalBones->GetRootBone());
-	CreateThighAndCalf("l_thigh_002", "l_calf_002", BoneRadius, 1, BoneActiveThreshold, SkeletalBones->GetRootBone());
-	CreateThighAndCalf("l_thigh_003", "l_calf_003", BoneRadius, 1, BoneActiveThreshold, SkeletalBones->GetRootBone());
+	CreateThighAndCalf("l_thigh", "l_calf", BoneRadius, 1.5f, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
+	CreateThighAndCalf("l_thigh_001", "l_calf_001", BoneRadius, 1, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
+	CreateThighAndCalf("l_thigh_002", "l_calf_002", BoneRadius, 1, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
+	CreateThighAndCalf("l_thigh_003", "l_calf_003", BoneRadius, 1, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
 	
 	const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	TObjectPtr<APlayerCameraManager> PlayerCamera;
@@ -88,6 +88,7 @@ FVector AGooEnemy::CalculateSpawnLocation()
 void AGooEnemy::UpdateBones() const
 {
 	SkeletalBones->UpdateSkeletal(GetWorld(), ParticleSystem.Get());
+	OnSkeletalUpdated.Broadcast();
 }
 
 void AGooEnemy::Tick(float DeltaTime)
@@ -115,6 +116,7 @@ void AGooEnemy::Hit(int32 InstanceIndex) const
 
 	SkeletalBones->PerformCapsuleTrace(GetWorld(), ClosestBonePair, ParticleSystem.Get());
 	OnHitEvent.Broadcast(gooParticle.Position);
+	OnSkeletalUpdated.Broadcast();
 }
 
 void AGooEnemy::ReceiveImpulse(FVector Location, float Radius, float Force) const
@@ -138,15 +140,54 @@ void AGooEnemy::SpawnParticleGroup()
 	}
 }
 
+ 
+
+bool AGooEnemy::IsBoneActive(FName BoneName)
+{
+	return SkeletalBones->GetBonePairByName(BoneName)->IsActive();
+}
+
+bool AGooEnemy::IsLimbActive(FName ParentBoneName)
+{
+	const BonePair* ParentBonePair = SkeletalBones->GetBonePairByName(ParentBoneName);
+	if (!ParentBonePair->IsActive()) return false;
+	
+	for (auto BonePair : ParentBonePair->GetChildBones())
+	{
+		if(!IsLimbActive(BonePair->Bone1))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+int AGooEnemy::GetActiveBonesCount()
+{
+	int result = 0;
+	for (const auto BonePair : SkeletalBones.Get()->GetAllBones())
+	{
+		if (BonePair->IsActive()) result++;
+	}
+
+	return result;
+}
+
+bool AGooEnemy::IsRootBoneActive()
+{
+	return SkeletalBones->GetRootBone()->IsActive();
+}
+
 AGooEnemy::~AGooEnemy()
 {
 }
 
-void AGooEnemy::CreateThighAndCalf(const FName& ThighName, const FName& CalfName, float Radius, float AttractionMultiplier, float Threshold, BonePair* ParentBone) const
+void AGooEnemy::CreateThighAndCalf(const FName& ThighName, const FName& CalfName, float Radius, float AttractionMultiplier, float ThresholdByLength, BonePair* ParentBone) const
 {
-	BonePair* Thigh = new BonePair(ThighName, SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex(ThighName) + 1), Radius, AttractionMultiplier, Threshold, SkeletalMesh);
+	BonePair* Thigh = new BonePair(ThighName, SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex(ThighName) + 1), Radius, AttractionMultiplier, ThresholdByLength, SkeletalMesh);
 	SkeletalBones->AddBone(Thigh, ParentBone);
 
-	BonePair* Calf = new BonePair(CalfName, SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex(CalfName) + 1), Radius, AttractionMultiplier, Threshold, SkeletalMesh, false, true);
+	BonePair* Calf = new BonePair(CalfName, SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex(CalfName) + 1), Radius, AttractionMultiplier, ThresholdByLength, SkeletalMesh, false, true);
 	SkeletalBones->AddBone(Calf, Thigh);
 }

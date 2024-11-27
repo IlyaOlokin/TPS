@@ -6,11 +6,12 @@
 #include "GooParticleSystem.h"
 
 
-BonePair::BonePair(FName InBone1, FName InBone2, float Radius, float AttractionMultiplier, int ActiveThreshold,USkeletalMeshComponent* SkeletalMesh,
+BonePair::BonePair(FName InBone1, FName InBone2, float Radius, float AttractionMultiplier, float InActiveThresholdByLenght, USkeletalMeshComponent* SkeletalMesh,
 	bool bIsRootBone, bool bNeedAdditionalForce)
-: Bone1(InBone1), Bone2(InBone2), Radius(Radius), AttractionMultiplier(AttractionMultiplier), ActiveThreshold(ActiveThreshold),
+: Bone1(InBone1), Bone2(InBone2), AttractionMultiplier(AttractionMultiplier), Radius(Radius),
 bIsRootBone(bIsRootBone), bNeedAdditionalForce(bNeedAdditionalForce), SkeletalMesh(SkeletalMesh)
 {
+	ActiveThreshold = (SkeletalMesh->GetBoneLocation(InBone1) - SkeletalMesh->GetBoneLocation(InBone2)).Size() * InActiveThresholdByLenght;
 }
 
 FName BonePair::GetBoneName() const
@@ -47,7 +48,7 @@ void BonePair::SetActive(bool bActive, const GooParticleSystem* ParticleSystem, 
 	
 	for (auto BonePair : ChildBones)
 	{
-		if (!bIsActive) BonePair->SetActive(bActive, ParticleSystem, World, false);
+		if (!bIsActive) BonePair->SetActive(bActive, ParticleSystem, World, !bIsRecentlyHit);
 		BonePair->SetHasAttraction(bActive);
 	}
 	

@@ -10,6 +10,7 @@
 #include "GooEnemy.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHitEvent, FVector, HitLocation);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkeletalUpdated);
 
 UCLASS()
 class TPS_API AGooEnemy : public ACharacter
@@ -46,13 +47,13 @@ protected:
 	float RootBoneRadius = 75;
 	
 	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Skeletal")
-	int RootBoneActiveThreshold = 100;
+	float RootBoneActiveThresholdByLenght = 0.35;
 
 	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Skeletal")
 	float BoneRadius = 50;
 
 	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Skeletal")
-	int BoneActiveThreshold = 80;
+	float BoneActiveThresholdByLenght = 0.25;
 
 	UPROPERTY(EditAnywhere, Category = "ParticleSystem|Skeletal")
 	float AttractionMultiplierForActiveState =  0.7f;
@@ -86,6 +87,9 @@ protected:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHitEvent OnHitEvent;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnSkeletalUpdated OnSkeletalUpdated;
 	
 	virtual void BeginPlay() override;
 
@@ -104,8 +108,20 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void SpawnParticleGroup();
+	
+	UFUNCTION(BlueprintCallable)
+	bool IsBoneActive(FName BoneName);
+
+	UFUNCTION(BlueprintCallable)
+	bool IsLimbActive(FName ParentBoneName);
+
+	UFUNCTION(BlueprintCallable)
+	int GetActiveBonesCount();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsRootBoneActive();
 
 private:
 	void CreateThighAndCalf(const FName& ThighName, const FName& CalfName,
-	                        float Radius, float AttractionMultiplier, float Threshold, BonePair* ParentBone) const;
+	                        float Radius, float AttractionMultiplier, float ThresholdByLength, BonePair* ParentBone) const;
 };

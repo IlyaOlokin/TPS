@@ -21,7 +21,7 @@ public:
 	int CurrentParticleCount;
 	int ActiveThreshold;
 	
-	BonePair(FName InBone1, FName InBone2, float Radius, float AttractionMultiplier, int ActiveThreshold,
+	BonePair(FName InBone1, FName InBone2, float Radius, float AttractionMultiplier, float InActiveThresholdByLenght,
 		USkeletalMeshComponent* SkeletalMesh, bool bIsRootBone = false, bool bNeedAdditionalForce = false);
 
 	FName GetBoneName() const;

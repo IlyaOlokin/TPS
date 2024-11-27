@@ -46,6 +46,18 @@ const TArray<BonePair*>& GooSkeletal::GetAllBones() const
 	return BonePairs;
 }
 
+const BonePair* GooSkeletal::GetBonePairByName(FName BoneName) const
+{
+	for (auto BonePair : BonePairs)
+	{
+		if (BonePair->Bone1 == BoneName)
+		{
+			return BonePair;
+		}
+	}
+	return nullptr;
+}
+
 void GooSkeletal::UpdateSkeletal(UWorld* World, const GooParticleSystem* ParticleSystem)
 {
 	for (const auto BonePair : BonePairs)
