@@ -38,10 +38,10 @@ private:
 	GooParticleGrid* ParticleGrid;
 	USkeletalMeshComponent* SkeletalMesh;
 
-	void CalculateParentAttraction(float DeltaTime);
-	void CalculatePressure(float DeltaTime);
+	void CalculateParentAttraction(float DeltaTime) const;
+	void CalculatePressure(float DeltaTime) const;
 	void UpdateParticlePositions(float DeltaTime);
-	void UpdateDensities();
+	void UpdateDensities() const;
 	void UpdateDestroyedParticleTransform(GooParticle& Particle);
 	
 	

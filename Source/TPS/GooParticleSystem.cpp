@@ -37,17 +37,83 @@ void GooParticleSystem::SetInitialPool(int32 PoolSize, const FGooParams& InGooPa
 void GooParticleSystem::Update(float DeltaTime)
 {
 	DeltaTime = FMath::Min(DeltaTime, 0.016f);
+
+	double StartTime, EndTime, ElapsedTime;
+
 	
+	StartTime = FPlatformTime::Seconds();
 	CalculateParentAttraction(DeltaTime);
+	EndTime = FPlatformTime::Seconds();
+	ElapsedTime = EndTime - StartTime;
+	//UE_LOG(LogTemp, Log, TEXT("CalculateParentAttraction: %f"), ElapsedTime * 1000);
+
+	StartTime = FPlatformTime::Seconds();
 	ParticleGrid->ConstructGrid(ObjectPool->Particles, ObjectPool->ActiveInstances);
+	EndTime = FPlatformTime::Seconds();
+	ElapsedTime = EndTime - StartTime;
+	//UE_LOG(LogTemp, Log, TEXT("ConstructGrid: %f"), ElapsedTime * 1000);
+	
+	StartTime = FPlatformTime::Seconds();
 	UpdateDensities();
+	EndTime = FPlatformTime::Seconds();
+	ElapsedTime = EndTime - StartTime;
+	//UE_LOG(LogTemp, Log, TEXT("UpdateDensities: %f"), ElapsedTime * 1000);
+
+	StartTime = FPlatformTime::Seconds();
 	CalculatePressure(DeltaTime);
+	EndTime = FPlatformTime::Seconds();
+	ElapsedTime = EndTime - StartTime;
+	//UE_LOG(LogTemp, Log, TEXT("CalculatePressure: %f"), ElapsedTime * 1000);
+
+	StartTime = FPlatformTime::Seconds();
 	UpdateParticlePositions(DeltaTime);
+	EndTime = FPlatformTime::Seconds();
+	ElapsedTime = EndTime - StartTime;
+	//UE_LOG(LogTemp, Log, TEXT("UpdateParticlePositions: %f"), ElapsedTime * 1000);
+	//UE_LOG(LogTemp, Log, TEXT("__________________________________________"));
 	
 	ObjectPool->ISM->MarkRenderStateDirty();
 }
 
-void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
+/*void GooParticleSystem::Update(float DeltaTime)
+{
+	DeltaTime = FMath::Min(DeltaTime, 0.016f);
+	
+	CalculateParentAttraction(DeltaTime);
+	ParticleGrid->ConstructGrid(ObjectPool->Particles, ObjectPool->ActiveInstances);
+	// Массив для отслеживания завершения задач
+	TArray<TSharedPtr<FGraphEvent>> Tasks;
+
+	// Создаем первую задачу: UpdateDensities
+	FGraphEventRef UpdateDensitiesTask = FFunctionGraphTask::CreateAndDispatchWhenReady(
+		[this]()
+		{
+			this->UpdateDensities();
+		},
+		TStatId(), nullptr, ENamedThreads::AnyBackgroundThreadNormalTask
+	);
+
+	// Создаем вторую задачу: CalculatePressure, которая ждет завершения UpdateDensities
+	FGraphEventRef CalculatePressureTask = FFunctionGraphTask::CreateAndDispatchWhenReady(
+		[this, DeltaTime]()
+		{
+			this->CalculatePressure(DeltaTime);
+		},
+		TStatId(), UpdateDensitiesTask, ENamedThreads::AnyBackgroundThreadNormalTask
+	);
+
+	// Выполняем UpdateParticlePositions на основном потоке
+	UpdateParticlePositions(DeltaTime);
+
+	// Ожидаем завершения всех задач
+	FTaskGraphInterface::Get().WaitUntilTaskCompletes(CalculatePressureTask);
+
+	// Вызываем MarkRenderStateDirty после завершения всех задач
+	
+	ObjectPool->ISM->MarkRenderStateDirty();
+}*/
+
+void GooParticleSystem::CalculateParentAttraction(float DeltaTime) const
 {
 	const float MaxAttractionDistance = GooParams.maxAttractionDistance;
 	
@@ -116,7 +182,7 @@ void GooParticleSystem::CalculateParentAttraction(float DeltaTime)
 	});
 }
 
-void GooParticleSystem::CalculatePressure(float DeltaTime)
+void GooParticleSystem::CalculatePressure(float DeltaTime) const
 {
 	ParallelFor(ObjectPool->ActiveInstances.Num(), [this, DeltaTime](int32 Index)
 	{
@@ -142,13 +208,14 @@ void GooParticleSystem::UpdateParticlePositions(float DeltaTime)
 		}
 		ObjectPool->Particles[ParticleIndex].Velocity = ObjectPool->Particles[ParticleIndex].Velocity.GetClampedToMaxSize(GooParams.maxParticleSpeed);
 		ObjectPool->Particles[ParticleIndex].Position += ObjectPool->Particles[ParticleIndex].Velocity * DeltaTime;
+		
 		ObjectPool->Particles[ParticleIndex].Update(DeltaTime,
 			(ObjectPool->Particles[ParticleIndex].Position - PlayerCamera->GetCameraLocation()).Size(),
 			GooCalculator::IsPointInView(PlayerCamera, ObjectPool->Particles[ParticleIndex].Position));
 	}
 }
 
-void GooParticleSystem::UpdateDensities()
+void GooParticleSystem::UpdateDensities() const
 {
 	ParallelFor(ObjectPool->ActiveInstances.Num(), [this](int32 Index)
 	{
