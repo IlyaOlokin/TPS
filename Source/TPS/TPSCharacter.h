@@ -15,7 +15,8 @@ class UInputAction;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShoot);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnShoot, bool, bHit, FVector, EndLocation);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartAim);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStopAim);
 
@@ -64,10 +65,10 @@ class ATPSCharacter : public ACharacter
 	FOnShoot OnShoot;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnShoot FOnStartAim;
+	FOnStartAim FOnStartAim;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnShoot FOnStopAim;
+	FOnStopAim FOnStopAim;
 
 public:
 	ATPSCharacter();

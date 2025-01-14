@@ -23,12 +23,12 @@ void AGooEnemy::BeginPlay()
 	SkeletalBones->SetRootBone(new BonePair("neck", SkeletalMesh->GetBoneName(SkeletalMesh->GetBoneIndex("neck") + 1), RootBoneRadius, 0.5f, RootBoneActiveThresholdByLenght, SkeletalMesh, true));
 
 	
-	CreateThighAndCalf("r_thigh", "r_calf", BoneRadius, 1.5f, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
+	//CreateThighAndCalf("r_thigh", "r_calf", BoneRadius, 1.5f, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
 	CreateThighAndCalf("r_thigh_001", "r_calf_001", BoneRadius, 1, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
 	CreateThighAndCalf("r_thigh_002", "r_calf_002", BoneRadius, 1, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
 	CreateThighAndCalf("r_thigh_003", "r_calf_003", BoneRadius, 1, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
 	
-	CreateThighAndCalf("l_thigh", "l_calf", BoneRadius, 1.5f, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
+	//CreateThighAndCalf("l_thigh", "l_calf", BoneRadius, 1.5f, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
 	CreateThighAndCalf("l_thigh_001", "l_calf_001", BoneRadius, 1, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
 	CreateThighAndCalf("l_thigh_002", "l_calf_002", BoneRadius, 1, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
 	CreateThighAndCalf("l_thigh_003", "l_calf_003", BoneRadius, 1, BoneActiveThresholdByLenght, SkeletalBones->GetRootBone());
@@ -43,10 +43,6 @@ void AGooEnemy::BeginPlay()
 	ParticleSystem =  MakeUnique<GooParticleSystem>(ISM, SkeletalMesh, SkeletalBones.Get(), PlayerCamera);
 	
 	const std::function<FVector()> CalculatePosDelegate = std::bind(&AGooEnemy::CalculateSpawnLocation, this);
-	ParticleSystem->SetInitialPool(FMath::Min(InitialPoolSize, MaxParticleCount), GooParams,  CalculatePosDelegate);
-	StartSpawning();
-	
-	GetWorldTimerManager().SetTimer(UpdateBonesTimerHandle, this, &AGooEnemy::UpdateBones, 1.0f, true);
 	
 	GooParticle::MinDistanceToCamera = MinDistanceToCamera;
 	GooParticle::MaxDistanceToCamera = MaxDistanceToCamera;
@@ -59,6 +55,11 @@ void AGooEnemy::BeginPlay()
 	BonePair::AttractionMultiplierForDeactivatedState = AttractionMultiplierForDeactivatedState;
 	
 	ISM->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
+	
+	ParticleSystem->SetInitialPool(FMath::Min(InitialPoolSize, MaxParticleCount), GooParams,  CalculatePosDelegate);
+	StartSpawning();
+	
+	GetWorldTimerManager().SetTimer(UpdateBonesTimerHandle, this, &AGooEnemy::UpdateBones, 1.0f, true);
 }
 
 void AGooEnemy::StartSpawning()
