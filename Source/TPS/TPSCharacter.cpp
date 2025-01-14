@@ -208,13 +208,12 @@ void ATPSCharacter::Shoot()
 	FHitResult AimHitResult;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
-	
-	OnShoot.Broadcast();
 
-	GetWorld()->LineTraceSingleByChannel(AimHitResult, AimStart, AimEnd, ECC_GameTraceChannel2, Params, FCollisionResponseParams());
+
+	const bool bHit = GetWorld()->LineTraceSingleByChannel(AimHitResult, AimStart, AimEnd, ECC_GameTraceChannel2, Params, FCollisionResponseParams());
 	
 	const FVector Start = WeaponSkeletalMesh->GetSocketLocation("Barrel");
-	FVector Dir = AimHitResult.Location - Start;
+	FVector Dir = (bHit ? AimHitResult.Location : AimHitResult.TraceEnd)  - Start;
 	Dir.Normalize();
 	const FVector End = Start + Dir * ShootDistance;
 	
@@ -235,12 +234,18 @@ void ATPSCharacter::Shoot()
 				Enemy->Hit(InstanceIndex);
 				Enemy->ReceiveImpulse(HitResult.Location, HitImpulseRadius, HitImpulseForce);
 			}
+			OnShoot.Broadcast(true, HitResult.Location);
 		}
-		DrawDebugLine(GetWorld(), Start, HitResult.Location, FColor::Green, false, 1.0f);
+		//DrawDebugLine(GetWorld(), Start, HitResult.Location, FColor::Green, false, 1.0f);
+		else
+		{
+			OnShoot.Broadcast(false, HitResult.Location);
+		}
 	}
 	else
 	{
-		DrawDebugLine(GetWorld(), Start, HitResult.TraceEnd, FColor::Green, false, 1.0f);
+		//DrawDebugLine(GetWorld(), Start, HitResult.TraceEnd, FColor::Green, false, 1.0f);
+		OnShoot.Broadcast(false, HitResult.TraceEnd);
 	}
 	
 	FTimerHandle TimerHandle;
